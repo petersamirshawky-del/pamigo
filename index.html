@@ -133,6 +133,28 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 .rate-slider-container input[type=range]{width:100%;accent-color:#ff6b35;height:8px}
 .rate-display{text-align:center;font-size:32px;font-weight:700;color:#ff6b35;margin:10px 0}
 .rate-tier-display{text-align:center;font-size:18px;margin:8px 0;font-weight:600}
+/* Admin styles */
+.admin-header{background:linear-gradient(135deg,#8b0000,#c0392b);color:#fff;padding:20px;border-radius:16px;text-align:center;margin-bottom:20px}
+.admin-header h3{font-size:24px;margin-bottom:6px}
+.admin-header p{opacity:.9;font-size:14px}
+.admin-subtabs{display:flex;gap:8px;background:#fff;padding:6px;border-radius:30px;margin-bottom:16px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.admin-subtab{flex:1;padding:10px;border:none;border-radius:30px;font-weight:600;cursor:pointer;background:transparent;color:#6b7280;font-size:13px;min-width:70px}
+.admin-subtab.active{background:#c0392b;color:#fff}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.admin-item{background:#f9fafb;padding:14px;border-radius:12px;margin-bottom:10px;border-right:4px solid #c0392b}
+.admin-item .head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.admin-item .title{font-weight:700;color:#1a1a2e;font-size:15px}
+.admin-item .info{font-size:13px;color:#6b7280;margin-top:4px}
+.admin-item .actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.admin-btn{padding:5px 12px;border:none;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600}
+.admin-btn.primary{background:#1a2a6c;color:#fff}
+.admin-btn.warning{background:#f39c12;color:#fff}
+.admin-btn.danger{background:#e74c3c;color:#fff}
+.admin-btn.success{background:#27ae60;color:#fff}
+.frozen-badge{background:#95a5a6;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;margin-right:6px}
+.active-badge{background:#27ae60;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;margin-right:6px}
+.blocked-badge{background:#c0392b;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;margin-right:6px}
 @media(max-width:480px){.deal-card{min-width:140px}.offers-grid{grid-template-columns:1fr 1fr}.analytics-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -164,6 +186,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
     <button class="tab-btn" data-tab="dashboard" id="tabDashboard" style="display:none">📊 متجري</button>
     <button class="tab-btn" data-tab="reports" id="tabReports" style="display:none">📈 تقاريري</button>
     <button class="tab-btn" data-tab="analytics" id="tabAnalytics" style="display:none">📉 تحليلاتي</button>
+    <button class="tab-btn" data-tab="admin" id="tabAdmin" style="display:none">👑 الأدمن</button>
     <button class="tab-btn" data-tab="account" id="tabAccount" style="display:none">👤 حسابي</button>
     <button class="tab-btn" data-tab="login" id="tabLogin">🔐 دخول</button>
 </div>
@@ -370,6 +393,86 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
     </div>
 </div>
 
+<!-- ✅ لوحة الأدمن -->
+<div class="tab-content" id="tab-admin">
+    <div class="admin-header">
+        <h3>👑 لوحة الأدمن</h3>
+        <p>مرحباً بك يا صاحب المنصة</p>
+    </div>
+
+    <div class="admin-subtabs">
+        <button class="admin-subtab active" data-admin="dashboard" onclick="showAdminSection('dashboard')">📊 إحصائيات</button>
+        <button class="admin-subtab" data-admin="traders" onclick="showAdminSection('traders')">🏪 التجار</button>
+        <button class="admin-subtab" data-admin="customers" onclick="showAdminSection('customers')">👥 العملاء</button>
+        <button class="admin-subtab" data-admin="invoices" onclick="showAdminSection('invoices')">🧾 الفواتير</button>
+        <button class="admin-subtab" data-admin="notifications" onclick="showAdminSection('notifications')">📢 إشعارات</button>
+    </div>
+
+    <!-- قسم الإحصائيات -->
+    <div class="admin-section active" id="admin-dashboard">
+        <div class="card">
+            <h4 style="margin-bottom:15px">📊 إحصائيات المنصة</h4>
+            <div class="stats">
+                <div class="stat">🏪 التجار<br><strong id="admTraders">0</strong></div>
+                <div class="stat">👥 العملاء<br><strong id="admCustomers">0</strong></div>
+                <div class="stat">🧾 الفواتير<br><strong id="admInvoices">0</strong></div>
+                <div class="stat">💰 المبيعات<br><strong id="admSales">0 ج</strong></div>
+            </div>
+            <div class="stats">
+                <div class="stat">💵 كاش باك ممنوح<br><strong id="admCashbackGiven">0 ج</strong></div>
+                <div class="stat">💵 كاش باك مصروف<br><strong id="admCashbackSpent">0 ج</strong></div>
+                <div class="stat">📊 رصيد متبقي<br><strong id="admCashbackRemaining">0 ج</strong></div>
+                <div class="stat">🎁 عروض نشطة<br><strong id="admOffersCount">0</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم التجار -->
+    <div class="admin-section" id="admin-traders">
+        <div class="card">
+            <h4 style="margin-bottom:15px">🏪 إدارة التجار</h4>
+            <div id="adminTradersList"></div>
+        </div>
+    </div>
+
+    <!-- قسم العملاء -->
+    <div class="admin-section" id="admin-customers">
+        <div class="card">
+            <h4 style="margin-bottom:15px">👥 إدارة العملاء</h4>
+            <div id="adminCustomersList"></div>
+        </div>
+    </div>
+
+    <!-- قسم الفواتير -->
+    <div class="admin-section" id="admin-invoices">
+        <div class="card">
+            <h4 style="margin-bottom:15px">🧾 كل الفواتير</h4>
+            <input type="text" id="adminInvoiceSearch" placeholder="🔍 ابحث برقم الفاتورة أو اسم التاجر..." oninput="renderAdminInvoices()" style="margin-bottom:10px">
+            <div id="adminInvoicesList"></div>
+        </div>
+    </div>
+
+    <!-- قسم الإشعارات -->
+    <div class="admin-section" id="admin-notifications">
+        <div class="card">
+            <h4 style="margin-bottom:15px">📢 إرسال إشعار جماعي</h4>
+            <input type="text" id="notifTitle" placeholder="عنوان الإشعار">
+            <textarea id="notifMessage" placeholder="نص الإشعار" style="width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px;min-height:80px"></textarea>
+            <select id="notifTarget">
+                <option value="all">الكل (عملاء + تجار)</option>
+                <option value="customers">العملاء فقط</option>
+                <option value="merchants">التجار فقط</option>
+            </select>
+            <button onclick="sendAdminNotification()" style="background:#c0392b;margin-top:8px">📤 إرسال الإشعار</button>
+            <div id="notifResult" style="margin-top:8px;font-weight:bold;text-align:center"></div>
+            <div style="border-top:1px solid #ddd;margin-top:15px;padding-top:15px">
+                <h5 style="margin-bottom:10px">📋 الإشعارات المرسلة سابقاً</h5>
+                <div id="adminNotifHistory"><p style="color:#6b7280">لا توجد إشعارات</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="tab-content" id="tab-account">
     <div class="card">
         <h4 style="margin-bottom:15px">👤 حسابي</h4>
@@ -411,7 +514,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
     </div>
 </div>
 
-<div class="footer">PAMIGO v32.0 – مع تحسين GPS</div>
+<div class="footer">PAMIGO v33.0 – مع لوحة الأدمن</div>
 
 <div class="modal-overlay" id="merchantModal" onclick="closeModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
@@ -425,9 +528,12 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 
 <script>
 // ============================================================
-//  قاعدة البيانات الموحّدة (مع نسبة الكاش باك)
+//  الإعدادات
 // ============================================================
-const STORAGE_KEY = 'pamigo_merchants_v9';
+const ADMIN_BANK_CODE = 'PETAD-12321';
+const STORAGE_KEY = 'pamigo_merchants_v10';
+const ADMIN_STORAGE = 'pamigo_admin_data_v1';
+
 const defaultMerchants = [
     { bankCode:'MERCH-12345', name:'متجر أحمد للملابس', phone:'+20 100 111 111', category:'fashion', icon:'👗', lat:30.789, lng:31.001, cashbackRate:30, offers:[
         {id:101,title:'خصم 20% على الملابس الصيفية',discount:'20% OFF'},
@@ -468,8 +574,16 @@ const defaultMerchants = [
         {id:1101,title:'صيانة دورية',discount:'10% OFF'}
     ]}
 ];
+
 let merchants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultMerchants));
 function saveMerchants(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(merchants)); }
+
+let adminData = JSON.parse(localStorage.getItem(ADMIN_STORAGE)) || {
+    frozenTraders: [],
+    blockedCustomers: [],
+    notifications: []
+};
+function saveAdminData() { localStorage.setItem(ADMIN_STORAGE, JSON.stringify(adminData)); }
 
 function getMerchantTier(rate) {
     if (rate >= 40) return { name: '💎 VIP', cls: 'tier-vip' };
@@ -560,9 +674,6 @@ function getMerchantRating(n){ if(!ratings[n]) return null; const t = ratings[n]
 function getMerchantRatingCount(n){ return ratings[n]?ratings[n].length:0; }
 function renderStars(r){ if(!r) return ''; let h=''; for(let i=0;i<Math.floor(r);i++) h+='⭐'; return h; }
 
-// ============================================================
-//  GPS (محسّن - مع محاولتين)
-// ============================================================
 function getLocation(){
     const el = document.getElementById('locationText');
     if(!navigator.geolocation){ el.innerText='❌ المتصفح لا يدعم GPS'; return; }
@@ -742,6 +853,7 @@ function submitInvoice(){
     if(!uploadedFileName){ result.className='error'; result.innerText='❌ ارفع صورة الفاتورة'; return; }
     const m = merchants.find(x => x.bankCode === bankCode);
     if(!m){ result.className='error'; result.innerText='❌ بنكود غير صحيح'; return; }
+    if(adminData.frozenTraders.includes(bankCode)){ result.className='error'; result.innerText='❌ هذا التاجر موقوف مؤقتاً'; return; }
     if(!customerPhone){ result.className='error'; result.innerText='❌ أدخل رقم هاتف العميل'; return; }
     const rate = m.cashbackRate || 25;
     const merchantName = m.name;
@@ -1017,13 +1129,7 @@ function showReport(period) {
 function exportReportPDF() {
     if (!loggedInMerchant) { alert('سجل دخول كتاجر أولاً'); return; }
     const element = document.getElementById('reportContent');
-    const opt = {
-        margin: 10,
-        filename: `PAMIGO-Report-${currentReportPeriod}-${Date.now()}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+    const opt = { margin: 10, filename: `PAMIGO-Report-${currentReportPeriod}-${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
     html2pdf().set(opt).from(element).save();
 }
 
@@ -1076,19 +1182,233 @@ function deleteMerchantOffer(id){
     renderAll(); renderMerchantData();
 }
 
+// ============================================================
+//  دوال الأدمن
+// ============================================================
+function showAdminSection(section) {
+    document.querySelectorAll('.admin-subtab').forEach(b => b.classList.toggle('active', b.dataset.admin === section));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('admin-' + section).classList.add('active');
+    if (section === 'dashboard') renderAdminDashboard();
+    if (section === 'traders') renderAdminTraders();
+    if (section === 'customers') renderAdminCustomers();
+    if (section === 'invoices') renderAdminInvoices();
+    if (section === 'notifications') renderAdminNotifHistory();
+}
+
+function renderAdminDashboard() {
+    const tradersCount = merchants.length;
+    const allCustomers = new Set();
+    Object.keys(customerWallets).forEach(phone => allCustomers.add(phone));
+    invoiceHistory.forEach(inv => { if(inv.customerPhone) allCustomers.add(inv.customerPhone); });
+    const invoicesCount = invoiceHistory.length;
+    const totalSales = invoiceHistory.reduce((s,i)=>s+parseFloat(i.amount),0);
+    const totalCashbackGiven = invoiceHistory.reduce((s,i)=>s+parseFloat(i.cashback),0);
+    const totalCashbackSpent = redemptionHistory.reduce((s,r)=>s+parseFloat(r.usedCashback),0);
+    const remaining = totalCashbackGiven - totalCashbackSpent;
+    const offersCount = merchants.reduce((s,m)=>s+m.offers.length,0);
+    document.getElementById('admTraders').innerText = tradersCount;
+    document.getElementById('admCustomers').innerText = allCustomers.size;
+    document.getElementById('admInvoices').innerText = invoicesCount;
+    document.getElementById('admSales').innerText = totalSales.toFixed(2) + ' ج';
+    document.getElementById('admCashbackGiven').innerText = totalCashbackGiven.toFixed(2) + ' ج';
+    document.getElementById('admCashbackSpent').innerText = totalCashbackSpent.toFixed(2) + ' ج';
+    document.getElementById('admCashbackRemaining').innerText = remaining.toFixed(2) + ' ج';
+    document.getElementById('admOffersCount').innerText = offersCount;
+}
+
+function renderAdminTraders() {
+    const c = document.getElementById('adminTradersList');
+    if (!merchants.length) { c.innerHTML = '<p style="color:#6b7280">لا يوجد تجار</p>'; return; }
+    c.innerHTML = merchants.map(m => {
+        const isFrozen = adminData.frozenTraders.includes(m.bankCode);
+        const rate = m.cashbackRate || 25;
+        const tier = getMerchantTier(rate);
+        return `<div class="admin-item">
+            <div class="head">
+                <span class="title">${m.icon} ${m.name}</span>
+                ${isFrozen ? '<span class="frozen-badge">❄️ موقوف</span>' : '<span class="active-badge">✅ نشط</span>'}
+            </div>
+            <div class="info">🔑 ${m.bankCode} | 📱 ${m.phone} | 💰 ${rate}% <span class="tier-chip ${tier.cls}">${tier.name}</span></div>
+            <div class="info">🎁 ${m.offers.length} عرض</div>
+            <div class="actions">
+                <button class="admin-btn ${isFrozen?'success':'warning'}" onclick="toggleFreezeTrader('${m.bankCode}')">${isFrozen?'✅ إلغاء الإيقاف':'❄️ إيقاف مؤقت'}</button>
+                <button class="admin-btn primary" onclick="editTraderRate('${m.bankCode}')">💰 تعديل النسبة</button>
+                <button class="admin-btn danger" onclick="deleteTrader('${m.bankCode}')">🗑️ حذف</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleFreezeTrader(bankCode) {
+    const idx = adminData.frozenTraders.indexOf(bankCode);
+    if (idx === -1) adminData.frozenTraders.push(bankCode);
+    else adminData.frozenTraders.splice(idx, 1);
+    saveAdminData();
+    renderAdminTraders();
+    alert(idx === -1 ? '✅ تم إيقاف التاجر' : '✅ تم إلغاء الإيقاف');
+}
+
+function editTraderRate(bankCode) {
+    const m = merchants.find(x => x.bankCode === bankCode);
+    if (!m) return;
+    const current = m.cashbackRate || 25;
+    const newRate = prompt(`النسبة الحالية: ${current}%\nاكتب النسبة الجديدة (10-50):`, current);
+    if (newRate === null) return;
+    const rate = parseInt(newRate);
+    if (isNaN(rate) || rate < 10 || rate > 50) { alert('❌ النسبة لازم تكون بين 10 و 50'); return; }
+    m.cashbackRate = rate;
+    saveMerchants();
+    renderAdminTraders();
+    alert(`✅ تم تعديل النسبة إلى ${rate}%`);
+}
+
+function deleteTrader(bankCode) {
+    if (!confirm('هل أنت متأكد من حذف هذا التاجر نهائياً؟')) return;
+    merchants = merchants.filter(m => m.bankCode !== bankCode);
+    saveMerchants();
+    renderAdminTraders();
+    renderAdminDashboard();
+    alert('✅ تم حذف التاجر');
+}
+
+function renderAdminCustomers() {
+    const c = document.getElementById('adminCustomersList');
+    const customers = {};
+    Object.keys(customerWallets).forEach(phone => {
+        customers[phone] = { phone, totalEarned: 0, totalSpent: 0, balance: 0, shops: 0 };
+        Object.keys(customerWallets[phone]).forEach(bankCode => {
+            const w = customerWallets[phone][bankCode];
+            customers[phone].totalEarned += w.earned || 0;
+            customers[phone].totalSpent += w.spent || 0;
+            customers[phone].balance += w.balance || 0;
+            customers[phone].shops++;
+        });
+    });
+    const list = Object.values(customers);
+    if (!list.length) { c.innerHTML = '<p style="color:#6b7280">لا يوجد عملاء</p>'; return; }
+    c.innerHTML = list.map(cust => {
+        const isBlocked = adminData.blockedCustomers.includes(cust.phone);
+        return `<div class="admin-item">
+            <div class="head">
+                <span class="title">📱 ${cust.phone}</span>
+                ${isBlocked ? '<span class="blocked-badge">🚫 محظور</span>' : '<span class="active-badge">✅ نشط</span>'}
+            </div>
+            <div class="info">🏪 ${cust.shops} تاجر | 💰 كسب: ${cust.totalEarned.toFixed(2)} ج | 💵 صرف: ${cust.totalSpent.toFixed(2)} ج</div>
+            <div class="info">📊 الرصيد الحالي: <strong>${cust.balance.toFixed(2)} ج</strong></div>
+            <div class="actions">
+                <button class="admin-btn ${isBlocked?'success':'danger'}" onclick="toggleBlockCustomer('${cust.phone}')">${isBlocked?'✅ إلغاء الحظر':'🚫 حظر'}</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleBlockCustomer(phone) {
+    const idx = adminData.blockedCustomers.indexOf(phone);
+    if (idx === -1) adminData.blockedCustomers.push(phone);
+    else adminData.blockedCustomers.splice(idx, 1);
+    saveAdminData();
+    renderAdminCustomers();
+    alert(idx === -1 ? '✅ تم حظر العميل' : '✅ تم إلغاء الحظر');
+}
+
+function renderAdminInvoices() {
+    const c = document.getElementById('adminInvoicesList');
+    const q = (document.getElementById('adminInvoiceSearch')?.value || '').toLowerCase().trim();
+    let list = invoiceHistory;
+    if (q) {
+        list = list.filter(inv => 
+            (inv.number || '').toLowerCase().includes(q) || 
+            (inv.merchant || '').toLowerCase().includes(q) ||
+            (inv.customerPhone || '').includes(q)
+        );
+    }
+    if (!list.length) { c.innerHTML = '<p style="color:#6b7280">لا توجد فواتير</p>'; return; }
+    c.innerHTML = list.slice().reverse().map(inv => `
+        <div class="admin-item">
+            <div class="head">
+                <span class="title">📄 فاتورة #${inv.number}</span>
+                <span style="font-size:13px;color:#ff6b35;font-weight:700">${inv.amount} ج</span>
+            </div>
+            <div class="info">🏪 ${inv.merchant} | 📱 ${inv.customerPhone || '-'} | 💵 كاش باك: ${inv.cashback} ج (${inv.cashbackRate||25}%)</div>
+            <div class="info" style="font-size:12px">🕒 ${new Date(inv.date).toLocaleString('ar-EG')}</div>
+            <div class="actions">
+                <button class="admin-btn danger" onclick="deleteInvoice('${inv.number}')">🗑️ حذف</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteInvoice(number) {
+    if (!confirm('هل أنت متأكد من حذف هذه الفاتورة؟')) return;
+    const idx = invoiceHistory.findIndex(inv => inv.number === number);
+    if (idx === -1) return;
+    invoiceHistory.splice(idx, 1);
+    saveInvoices();
+    renderAdminInvoices();
+    renderAdminDashboard();
+    alert('✅ تم حذف الفاتورة');
+}
+
+function renderAdminNotifHistory() {
+    const c = document.getElementById('adminNotifHistory');
+    if (!adminData.notifications.length) { c.innerHTML = '<p style="color:#6b7280">لا توجد إشعارات</p>'; return; }
+    c.innerHTML = adminData.notifications.slice().reverse().map(n => `
+        <div class="admin-item">
+            <div class="head">
+                <span class="title">📢 ${n.title}</span>
+                <span style="font-size:12px;color:#6b7280">${n.target === 'all' ? 'الكل' : n.target === 'customers' ? 'العملاء' : 'التجار'}</span>
+            </div>
+            <div class="info">${n.message}</div>
+            <div class="info" style="font-size:12px">🕒 ${n.date}</div>
+        </div>
+    `).join('');
+}
+
+function sendAdminNotification() {
+    const title = document.getElementById('notifTitle').value.trim();
+    const message = document.getElementById('notifMessage').value.trim();
+    const target = document.getElementById('notifTarget').value;
+    const resultEl = document.getElementById('notifResult');
+    if (!title || !message) {
+        resultEl.style.color = '#ef4444';
+        resultEl.innerText = '❌ املأ العنوان والرسالة';
+        return;
+    }
+    adminData.notifications.push({
+        title, message, target,
+        date: new Date().toLocaleString('ar-EG')
+    });
+    saveAdminData();
+    resultEl.style.color = '#27ae60';
+    resultEl.innerText = '✅ تم إرسال الإشعار بنجاح';
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifMessage').value = '';
+    renderAdminNotifHistory();
+    setTimeout(()=>{ resultEl.innerText=''; }, 3000);
+}
+
+// ============================================================
+//  تسجيل الدخول/الخروج
+// ============================================================
 function setRole(role){
     currentRole = role;
     document.getElementById('roleCustomer').classList.toggle('active', role==='customer');
     document.getElementById('roleMerchant').classList.toggle('active', role==='merchant');
     document.getElementById('bankCodeGroup').style.display = role==='merchant'?'block':'none';
 }
+
 function switchUI(role){
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     const cTabs = ['tabHome','tabOffers','tabRequests','tabInvoice'];
     const mTabs = ['tabDashboard','tabReports','tabAnalytics'];
+    const aTabs = ['tabAdmin'];
     cTabs.forEach(id => document.getElementById(id).style.display='none');
     mTabs.forEach(id => document.getElementById(id).style.display='none');
+    aTabs.forEach(id => document.getElementById(id).style.display='none');
+
     if(pickerMap){ pickerMap.remove(); pickerMap=null; pickerMarker=null; }
+
     if(!role || role==='guest'){
         document.getElementById('tabLogin').style.display='block';
         document.getElementById('tabAccount').style.display='none';
@@ -1098,7 +1418,17 @@ function switchUI(role){
     }
     document.getElementById('tabLogin').style.display='none';
     document.getElementById('tabAccount').style.display='block';
-    if(role==='customer'){
+
+    if(role==='admin'){
+        aTabs.forEach(id => document.getElementById(id).style.display='block');
+        document.getElementById('tabAdmin').classList.add('active');
+        document.getElementById('greetingTitle').innerHTML='👑 PAMIGO (أدمن)';
+        document.getElementById('accName').innerText='المدير';
+        document.getElementById('accPhone').innerText='-';
+        document.getElementById('pickerTitle').innerText = '📍 حدد موقعك';
+        document.getElementById('pickerHint').innerText = 'اضغط على الخريطة أو حرك الدبوس';
+        renderAdminDashboard();
+    } else if(role==='customer'){
         cTabs.forEach(id => document.getElementById(id).style.display='block');
         document.getElementById('tabHome').classList.add('active');
         document.getElementById('greetingTitle').innerHTML='PAMIGO (عميل)';
@@ -1122,6 +1452,7 @@ function switchUI(role){
     const act = document.querySelector('.tab-content.active');
     if(act){ const id = act.id.replace('tab-',''); const btn = document.querySelector(`.tab-btn[data-tab="${id}"]`); if(btn) btn.classList.add('active'); }
 }
+
 function handleLogin(){
     const phone = document.getElementById('loginPhone').value.trim();
     const pass = document.getElementById('loginPassword').value.trim();
@@ -1130,16 +1461,43 @@ function handleLogin(){
     if(!phone||!pass){ res.style.color='red'; res.innerText='❌ املأ البيانات'; return; }
     if(currentRole==='merchant'){
         if(!bank){ res.style.color='red'; res.innerText='❌ أدخل البنكود'; return; }
+        // ✅ التحقق من بنكود الأدمن
+        if(bank === ADMIN_BANK_CODE){
+            loggedInMerchant = null;
+            res.style.color = 'green';
+            res.innerText = '👑 مرحباً بك يا مدير المنصة';
+            switchUI('admin');
+            renderAll();
+            return;
+        }
         const merchant = merchants.find(m => m.bankCode === bank);
-        if(merchant){ loggedInMerchant = merchant; res.style.color='green'; res.innerText=`✅ مرحباً تاجر (${merchant.name})`; switchUI('merchant'); }
-        else { res.style.color='red'; res.innerText='❌ بنكود غير صحيح'; }
+        if(merchant){
+            if(adminData.frozenTraders.includes(bank)){
+                res.style.color='red';
+                res.innerText='❌ حسابك موقوف مؤقتاً. تواصل مع الإدارة';
+                return;
+            }
+            loggedInMerchant = merchant;
+            res.style.color='green';
+            res.innerText=`✅ مرحباً تاجر (${merchant.name})`;
+            switchUI('merchant');
+        } else {
+            res.style.color='red';
+            res.innerText='❌ بنكود غير صحيح';
+        }
     } else {
+        if(adminData.blockedCustomers.includes(phone)){
+            res.style.color='red';
+            res.innerText='❌ حسابك محظور. تواصل مع الإدارة';
+            return;
+        }
         res.style.color='green'; res.innerText='✅ مرحباً عميل';
         loggedInMerchant = null;
         switchUI('customer');
     }
     renderAll();
 }
+
 function handleLogout(){
     loggedInMerchant = null;
     invoiceHistory = []; cashbackTotal = 0;
@@ -1172,6 +1530,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         if(id==='analytics' && currentRole==='merchant') renderAnalytics();
         if(id==='reports' && currentRole==='merchant') showReport(currentReportPeriod);
         if(id==='dashboard' && currentRole==='merchant') renderMerchantData();
+        if(id==='admin') renderAdminDashboard();
     });
 });
 document.querySelectorAll('#offersCategories .category-chip').forEach(btn => {
