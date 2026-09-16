@@ -307,10 +307,10 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div class="rate-slider-container">
 <div class="rate-display"><span id="rateValueDisplay">15</span>%</div>
 <div class="rate-tier-display" id="rateTierDisplay">🥈 مميز</div>
-<input type="range" id="rateSlider" min="5" max="30" step="1" value="15" oninput="updateRateDisplay(this.value)">
+<input type="range" id="rateSlider" min="1" max="50" step="1" value="15" oninput="updateRateDisplay(this.value)">
 <div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-top:5px">
-<span>5% (الحد الأدنى)</span>
-<span>30% (الحد الأقصى)</span>
+<span>1% (الحد الأدنى)</span>
+<span>50% (الحد الأقصى)</span>
 </div>
 </div>
 <button onclick="saveCashbackRate()" style="margin-top:10px;background:#10b981">💾 حفظ النسبة</button>
@@ -354,10 +354,10 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div class="card" id="reportContent">
 <h4 style="margin-bottom:15px">📈 تقارير متجري</h4>
 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
-<button onclick="showReport('daily')" class="report-period-btn active" data-period="daily">📅 النهاردة</button>
+<button onclick="showReport('daily')" class="report-period-btn" data-period="daily">📅 النهاردة</button>
 <button onclick="showReport('weekly')" class="report-period-btn" data-period="weekly">📅 الأسبوع</button>
 <button onclick="showReport('monthly')" class="report-period-btn" data-period="monthly">📅 الشهر</button>
-<button onclick="showReport('all')" class="report-period-btn" data-period="all">📅 الكل</button>
+<button onclick="showReport('all')" class="report-period-btn active" data-period="all">📅 الكل</button>
 </div>
 <div id="reportPeriodLabel" style="text-align:center;color:#1a2a6c;margin-bottom:15px;font-weight:600;font-size:15px"></div>
 <div class="stats">
@@ -574,8 +574,8 @@ notifications: []
 function saveAdminData() { localStorage.setItem(ADMIN_STORAGE, JSON.stringify(adminData)); }
 
 function getMerchantTier(rate) {
-if (rate >= 25) return { name: '💎 VIP', cls: 'tier-vip' };
-if (rate >= 20) return { name: '🥇 بريميوم', cls: 'tier-gold' };
+if (rate >= 40) return { name: '💎 VIP', cls: 'tier-vip' };
+if (rate >= 25) return { name: '🥇 بريميوم', cls: 'tier-gold' };
 if (rate >= 10) return { name: '🥈 مميز', cls: 'tier-silver' };
 return { name: '🥉 عادي', cls: 'tier-bronze' };
 }
@@ -658,7 +658,7 @@ let uploadedFileName = '';
 let ratings = JSON.parse(localStorage.getItem('pamigo_ratings')) || {};
 let currentModalMerchant = null;
 let pickerMap = null, pickerMarker = null;
-let currentReportPeriod = 'daily';
+let currentReportPeriod = 'all';
 
 function saveInvoices(){ localStorage.setItem('pamigo_invoices', JSON.stringify(invoiceHistory)); }
 function saveRatings(){ localStorage.setItem('pamigo_ratings', JSON.stringify(ratings)); }
@@ -858,7 +858,7 @@ if(!m){ result.className='error'; result.innerText='❌ بنكود غير صحي
 if(adminData.frozenTraders.includes(bankCode)){ result.className='error'; result.innerText='❌ هذا التاجر موقوف مؤقتاً'; return; }
 if(!customerPhone){ result.className='error'; result.innerText='❌ أدخل رقم هاتف العميل'; return; }
 
-const rate = m.cashbackRate || 25;
+const rate = m.cashbackRate || 15;
 const merchantName = m.name;
 const cashback = amount * (rate / 100);
 const now = new Date();
@@ -868,7 +868,7 @@ number, merchant: merchantName, merchantBankCode: bankCode, customerPhone,
 amount, cashback: cashback.toFixed(2), cashbackRate: rate,
 file: uploadedFileName, bankCode,
 date: now.toISOString(), day: now.toLocaleDateString('ar-EG',{weekday:'long'}), hour: now.getHours(),
-status: 'active' // ✅ الحالة الافتراضية
+status: 'active'
 });
 
 cashbackTotal += cashback;
@@ -1076,9 +1076,10 @@ else ic.innerHTML = myInvoices.map(inv => `
 <div class="merchant-invoice-item">
 <strong>📄 #${inv.number}</strong>
 <div style="font-size:13px;color:#6b7280">💰 ${inv.amount} ج | 💵 ${inv.cashback} ج | 📱 ${inv.customerPhone||'-'}</div>
-<div style="margin-top:6px;">
+<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
 ${inv.status === 'active' ? 
-`<button class="admin-btn danger" onclick="promptReturn('${inv.number}')">🔄 تسجيل مرتجع</button>` 
+`<button class="admin-btn primary" onclick="editInvoiceAmount('${inv.number}')">✏️ تعديل المبلغ</button>
+ <button class="admin-btn danger" onclick="promptReturn('${inv.number}')">🔄 تسجيل مرتجع</button>` 
 : `<span style="color:#ef4444;font-size:12px;">❌ مرتجع (${inv.returnAmount || 0} ج)</span>`
 }
 </div>
@@ -1109,7 +1110,7 @@ tierEl.innerHTML = `${tier.name} <span style="font-size:12px;color:#6b7280">(ك�
 function saveCashbackRate() {
 if (!loggedInMerchant) { alert('❌ سجل دخول كتاجر'); return; }
 const newRate = parseInt(document.getElementById('rateSlider').value);
-if (newRate < 5 || newRate > 30) { alert('❌ النسبة لازم تكون بين 5% و 30%'); return; }
+if (newRate < 1 || newRate > 50) { alert('❌ النسبة لازم تكون بين 1% و 50%'); return; }
 const merchant = merchants.find(m => m.bankCode === loggedInMerchant.bankCode);
 if (!merchant) { alert('❌ خطأ'); return; }
 merchant.cashbackRate = newRate;
@@ -1122,21 +1123,53 @@ setTimeout(()=>{ r.innerText=''; }, 3000);
 renderAll(); renderMerchantData();
 }
 
+// ========== دالة تعديل مبلغ الفاتورة ==========
+function editInvoiceAmount(invoiceNumber) {
+    if (!loggedInMerchant) { alert('❌ سجل دخول كتاجر'); return; }
+    const inv = invoiceHistory.find(i => i.number === invoiceNumber);
+    if (!inv || inv.status !== 'active') { alert('❌ الفاتورة غير موجودة أو مرتجعة'); return; }
+    
+    const newAmountStr = prompt(`المبلغ الحالي: ${inv.amount} ج\nاكتب المبلغ الجديد (لازم يكون أقل من أو يساوي ${inv.amount}):`);
+    if (newAmountStr === null) return;
+    
+    const newAmount = parseFloat(newAmountStr);
+    if (isNaN(newAmount) || newAmount <= 0) { alert('❌ مبلغ غير صحيح'); return; }
+    if (newAmount > parseFloat(inv.amount)) { alert('❌ المبلغ الجديد ما ينفعش يكون أكبر من الأصلي. لو عايز تزود، ده مش مرتجع.'); return; }
+    
+    const oldCashback = parseFloat(inv.cashback);
+    const newCashback = newAmount * (inv.cashbackRate / 100);
+    const cashbackDiff = oldCashback - newCashback;
+    
+    // خصم الفرق من محفظة العميل
+    const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
+    if (wallet && cashbackDiff > 0) {
+        wallet.balance -= cashbackDiff;
+        wallet.earned -= cashbackDiff;
+        saveWallets();
+    }
+    
+    inv.originalAmount = inv.originalAmount || inv.amount;
+    inv.amount = newAmount;
+    inv.cashback = newCashback.toFixed(2);
+    inv.editedAt = new Date().toISOString();
+    
+    saveInvoices();
+    renderAll();
+    if (loggedInMerchant) renderMerchantData();
+    
+    alert(`✅ تم تعديل الفاتورة.\n💰 المبلغ الجديد: ${newAmount} ج\n💵 الكاش باك الجديد: ${newCashback.toFixed(2)} ج\n📊 تم خصم ${cashbackDiff.toFixed(2)} ج من محفظة العميل.`);
+}
+
 // ========== دالة المرتجع ==========
 function processReturn(invoiceNumber, returnAmount) {
     const inv = invoiceHistory.find(i => i.number === invoiceNumber);
-    if (!inv || inv.status !== 'active') {
-        alert('❌ الفاتورة غير موجودة أو تم إرجاعها بالفعل');
-        return;
-    }
+    if (!inv || inv.status !== 'active') { alert('❌ الفاتورة غير موجودة أو تم إرجاعها بالفعل'); return; }
     const cashbackToReverse = returnAmount * (inv.cashbackRate / 100);
     const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
     if (wallet) {
         wallet.balance -= cashbackToReverse;
         wallet.earned -= cashbackToReverse;
-        if (wallet.balance < 0) {
-            console.log(`⚠️ العميل ${inv.customerPhone} عليه مديونية ${Math.abs(wallet.balance)} ج`);
-        }
+        if (wallet.balance < 0) { console.log(`⚠️ العميل ${inv.customerPhone} عليه مديونية ${Math.abs(wallet.balance)} ج`); }
         saveWallets();
     }
     inv.status = returnAmount >= inv.amount ? 'returned' : 'partial_return';
@@ -1182,9 +1215,18 @@ const isMine = r.bankCode === loggedInMerchant.bankCode;
 return isMine && rDate >= startDate;
 });
 
+// حساب الإجماليات مع استبعاد المرتجعات
+let totalSales = 0, totalCashbackGiven = 0;
+myInvoices.forEach(inv => {
+    const amt = parseFloat(inv.amount);
+    const cb = parseFloat(inv.cashback);
+    const retAmt = inv.returnAmount || 0;
+    const retCb = inv.returnedCashback || 0;
+    totalSales += (amt - retAmt);
+    totalCashbackGiven += (cb - retCb);
+});
+
 const totalInvoices = myInvoices.length;
-const totalSales = myInvoices.reduce((sum, inv) => sum + parseFloat(inv.amount), 0);
-const totalCashbackGiven = myInvoices.reduce((sum, inv) => sum + parseFloat(inv.cashback), 0);
 const totalCashbackSpent = myRedemptions.reduce((sum, r) => sum + parseFloat(r.usedCashback), 0);
 
 document.getElementById('repInvoices').innerText = totalInvoices;
@@ -1342,10 +1384,10 @@ function editTraderRate(bankCode) {
 const m = merchants.find(x => x.bankCode === bankCode);
 if (!m) return;
 const current = m.cashbackRate || 15;
-const newRate = prompt(`النسبة الحالية: ${current}%\nاكتب النسبة الجديدة (5-30):`, current);
+const newRate = prompt(`النسبة الحالية: ${current}%\nاكتب النسبة الجديدة (1-50):`, current);
 if (newRate === null) return;
 const rate = parseInt(newRate);
-if (isNaN(rate) || rate < 5 || rate > 30) { alert('❌ النسبة لازم تكون بين 5 و 30'); return; }
+if (isNaN(rate) || rate < 1 || rate > 50) { alert('❌ النسبة لازم تكون بين 1 و 50'); return; }
 m.cashbackRate = rate;
 saveMerchants();
 renderAdminTraders();
@@ -1549,7 +1591,6 @@ if(!phone||!pass){ res.style.color='red'; res.innerText='❌ املأ البيا
 
 if(currentRole==='merchant'){
 if(!bank){ res.style.color='red'; res.innerText='❌ أدخل البنكود'; return; }
-// ✅ التحقق من بنكود الأدمن
 if(bank === ADMIN_BANK_CODE){
 loggedInMerchant = null;
 res.style.color = 'green';
@@ -1588,7 +1629,8 @@ renderAll();
 
 function handleLogout(){
 loggedInMerchant = null;
-invoiceHistory = []; cashbackTotal = 0;
+cashbackTotal = 0;
+// ✅ لا نمسح invoiceHistory عشان الفواتير تفضل موجودة
 document.getElementById('accName').innerText='-';
 document.getElementById('accPhone').innerText='-';
 document.getElementById('cashbackBalance').innerText='-';
