@@ -411,7 +411,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
     </div>
 </div>
 
-<div class="footer">PAMIGO v31.0 – مع أيقونات محدّثة</div>
+<div class="footer">PAMIGO v32.0 – مع تحسين GPS</div>
 
 <div class="modal-overlay" id="merchantModal" onclick="closeModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
@@ -560,29 +560,40 @@ function getMerchantRating(n){ if(!ratings[n]) return null; const t = ratings[n]
 function getMerchantRatingCount(n){ return ratings[n]?ratings[n].length:0; }
 function renderStars(r){ if(!r) return ''; let h=''; for(let i=0;i<Math.floor(r);i++) h+='⭐'; return h; }
 
+// ============================================================
+//  GPS (محسّن - مع محاولتين)
+// ============================================================
 function getLocation(){
     const el = document.getElementById('locationText');
     if(!navigator.geolocation){ el.innerText='❌ المتصفح لا يدعم GPS'; return; }
     el.innerText = '⏳ جاري تحديد الموقع...';
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            if(loggedInMerchant){ el.innerText = `${loggedInMerchant.lat.toFixed(4)}, ${loggedInMerchant.lng.toFixed(4)}`; return; }
-            userLat = pos.coords.latitude;
-            userLng = pos.coords.longitude;
-            el.innerText = `${userLat.toFixed(4)}, ${userLng.toFixed(4)} (GPS)`;
-            document.getElementById('accLocation').innerText = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
-            filterDealsByRadius(parseFloat(document.getElementById('radiusSlider').value));
-            renderDeals();
-        },
-        err => {
-            let msg = '❌ تعذر تحديد الموقع';
-            if(err.code===1) msg='❌ تم رفض إذن الموقع';
-            else if(err.code===2) msg='❌ الموقع غير متاح';
-            else if(err.code===3) msg='❌ انتهت المهلة';
-            el.innerText = msg;
-        },
-        { enableHighAccuracy:true, timeout:15000, maximumAge:60000 }
-    );
+    const highAccuracyOptions = { enableHighAccuracy: true, timeout: 30000, maximumAge: 60000 };
+    const lowAccuracyOptions = { enableHighAccuracy: false, timeout: 30000, maximumAge: 300000 };
+    function onSuccess(pos) {
+        if(loggedInMerchant){ el.innerText = `${loggedInMerchant.lat.toFixed(4)}, ${loggedInMerchant.lng.toFixed(4)}`; return; }
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        el.innerText = `${userLat.toFixed(4)}, ${userLng.toFixed(4)} (GPS)`;
+        document.getElementById('accLocation').innerText = `${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+        filterDealsByRadius(parseFloat(document.getElementById('radiusSlider').value));
+        renderDeals();
+    }
+    function onError(err) {
+        if(err.code === 3 && highAccuracyOptions.enableHighAccuracy) {
+            el.innerText = '⏳ جاري تحديد الموقع (محاولة تانية)...';
+            navigator.geolocation.getCurrentPosition(onSuccess, onFinalError, lowAccuracyOptions);
+            return;
+        }
+        onFinalError(err);
+    }
+    function onFinalError(err) {
+        let msg = '❌ تعذر تحديد الموقع';
+        if(err.code === 1) msg = '❌ تم رفض إذن الموقع. تأكد من إعدادات الموبايل';
+        else if(err.code === 2) msg = '❌ الموقع غير متاح حالياً';
+        else if(err.code === 3) msg = '❌ انتهت المهلة. جرب في مكان مفتوح';
+        el.innerText = msg;
+    }
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, highAccuracyOptions);
 }
 function calculateDistance(lat1,lng1,lat2,lng2){
     const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
