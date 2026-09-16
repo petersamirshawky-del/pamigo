@@ -1,11 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 <title>PAMIGO</title>
-<link rel="icon" type="image/svg+xml" href="logo.svg">
-<link rel="apple-touch-icon" href="logo.svg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PAMIGO">
@@ -281,7 +283,6 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
         </div>
     </div>
 
-    <!-- ✅ قسم نسبة الكاش باك الجديد -->
     <div class="card" style="border-right:4px solid #ff6b35">
         <h4 style="margin-bottom:10px">💰 نسبة الكاش باك بتاعتك</h4>
         <p style="font-size:13px;color:#6b7280;margin-bottom:10px">اختار النسبة اللي تناسبك. كل ما تزود، كل ما محلك يظهر أول للعملاء.</p>
@@ -410,7 +411,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
     </div>
 </div>
 
-<div class="footer">PAMIGO v30.0 – مع نسبة كاش باك مخصصة</div>
+<div class="footer">PAMIGO v31.0 – مع أيقونات محدّثة</div>
 
 <div class="modal-overlay" id="merchantModal" onclick="closeModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
@@ -470,9 +471,6 @@ const defaultMerchants = [
 let merchants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultMerchants));
 function saveMerchants(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(merchants)); }
 
-// ============================================================
-//  دوال المستوى (Tier)
-// ============================================================
 function getMerchantTier(rate) {
     if (rate >= 40) return { name: '💎 VIP', cls: 'tier-vip' };
     if (rate >= 30) return { name: '🥇 بريميوم', cls: 'tier-gold' };
@@ -480,9 +478,6 @@ function getMerchantTier(rate) {
     return { name: '🥉 عادي', cls: 'tier-bronze' };
 }
 
-// ============================================================
-//  محفظة العملاء
-// ============================================================
 let customerWallets = JSON.parse(localStorage.getItem('pamigo_wallets')) || {};
 let redemptionHistory = JSON.parse(localStorage.getItem('pamigo_redemptions')) || [];
 function saveWallets() { localStorage.setItem('pamigo_wallets', JSON.stringify(customerWallets)); }
@@ -499,18 +494,13 @@ function addCashbackToWallet(phone, bankCode, cashbackAmount) {
     saveWallets();
 }
 
-// ============================================================
-//  تأثير "لمحة الحرف"
-// ============================================================
 function applyPeekEffect(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
     if (input.dataset.peekApplied === 'true') return;
     input.dataset.peekApplied = 'true';
-
     let peekTimer = null;
     let realValue = input.dataset.realValue || '';
-
     input.addEventListener('input', function(e) {
         const currentValue = this.value;
         let newRealValue = realValue;
@@ -536,7 +526,6 @@ function applyPeekEffect(inputId) {
             }
         }, 700);
     });
-
     input.addEventListener('paste', function(e) {
         e.preventDefault();
         const pastedText = (e.clipboardData || window.clipboardData).getData('text');
@@ -551,9 +540,6 @@ function getRealValue(inputId) {
     return (input.dataset.realValue || input.value || '').trim();
 }
 
-// ============================================================
-//  الحالة العامة
-// ============================================================
 let userLat = null, userLng = null;
 let specialRequests = [], requestIdCounter = 1;
 let invoiceHistory = JSON.parse(localStorage.getItem('pamigo_invoices')) || [];
@@ -574,9 +560,6 @@ function getMerchantRating(n){ if(!ratings[n]) return null; const t = ratings[n]
 function getMerchantRatingCount(n){ return ratings[n]?ratings[n].length:0; }
 function renderStars(r){ if(!r) return ''; let h=''; for(let i=0;i<Math.floor(r);i++) h+='⭐'; return h; }
 
-// ============================================================
-//  GPS
-// ============================================================
 function getLocation(){
     const el = document.getElementById('locationText');
     if(!navigator.geolocation){ el.innerText='❌ المتصفح لا يدعم GPS'; return; }
@@ -607,15 +590,10 @@ function calculateDistance(lat1,lng1,lat2,lng2){
     return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-// ============================================================
-//  عرض العروض (مرتبة حسب النسبة)
-// ============================================================
 function filterDealsByRadius(maxR){
     if(!userLat||!userLng){ document.getElementById('dealsList').innerHTML='<div class="no-requests">⏳ يرجى تحديد الموقع</div>'; return; }
     const filtered = merchants.filter(m => { m._dist = calculateDistance(userLat,userLng,m.lat,m.lng); return m._dist <= maxR; });
-    // ✅ رتب حسب النسبة (الأعلى أول)
     filtered.sort((a,b) => (b.cashbackRate || 25) - (a.cashbackRate || 25));
-
     const list = document.getElementById('dealsList');
     if(!filtered.length){ list.innerHTML=`<div class="no-requests">😅 لا توجد محلات ضمن ${maxR} كم</div>`; return; }
     list.innerHTML = filtered.map(m => {
@@ -668,9 +646,6 @@ function renderOffers(cat='all'){
     }).join('');
 }
 
-// ============================================================
-//  Modal
-// ============================================================
 function openMerchantModal(bankCode){
     const merchant = merchants.find(m => m.bankCode === bankCode);
     if(!merchant) return;
@@ -691,9 +666,6 @@ function closeMerchantModal(){ document.getElementById('merchantModal').classLis
 function closeModal(e){ if(e.target.classList.contains('modal-overlay')) closeMerchantModal(); }
 function openMerchantOnMap(){ if(!currentModalMerchant) return; window.open(`https://www.google.com/maps?q=${currentModalMerchant.lat},${currentModalMerchant.lng}`, '_blank'); }
 
-// ============================================================
-//  الخريطة
-// ============================================================
 function initPickerMap(){
     const mapContainer = document.getElementById('pickerMap');
     if(!mapContainer) return;
@@ -747,9 +719,6 @@ function savePickedLocation(){
     setTimeout(()=>{ r.innerText=''; }, 3000);
 }
 
-// ============================================================
-//  الفاتورة (بيستخدم نسبة التاجر)
-// ============================================================
 function handleFileUpload(e){ if(e.target.files[0]){ uploadedFileName = e.target.files[0].name; document.getElementById('fileName').innerText='📎 '+uploadedFileName; } }
 
 function submitInvoice(){
@@ -758,19 +727,15 @@ function submitInvoice(){
     const amount = parseFloat(document.getElementById('amount').value);
     const bankCode = getRealValue('bankCode');
     const result = document.getElementById('invoiceResult');
-
     if(!number||isNaN(amount)||amount<=0||!bankCode){ result.className='error'; result.innerText='❌ املأ رقم الفاتورة، المبلغ، والبنكود'; return; }
     if(!uploadedFileName){ result.className='error'; result.innerText='❌ ارفع صورة الفاتورة'; return; }
     const m = merchants.find(x => x.bankCode === bankCode);
     if(!m){ result.className='error'; result.innerText='❌ بنكود غير صحيح'; return; }
     if(!customerPhone){ result.className='error'; result.innerText='❌ أدخل رقم هاتف العميل'; return; }
-
-    // ✅ استخدم نسبة التاجر
     const rate = m.cashbackRate || 25;
     const merchantName = m.name;
     const cashback = amount * (rate / 100);
     const now = new Date();
-
     invoiceHistory.push({
         number, merchant: merchantName, merchantBankCode: bankCode, customerPhone,
         amount, cashback: cashback.toFixed(2), cashbackRate: rate,
@@ -780,10 +745,8 @@ function submitInvoice(){
     cashbackTotal += cashback;
     saveInvoices();
     addCashbackToWallet(customerPhone, bankCode, cashback);
-
     result.className = 'success';
     result.innerText = `✅ تم الرفع! كاش باك ${cashback.toFixed(2)} ج (${rate}%) للعميل ${customerPhone}`;
-
     lastRatedMerchant = merchantName;
     document.getElementById('ratedMerchantName').innerText = merchantName;
     document.getElementById('ratingSection').style.display = 'block';
@@ -791,7 +754,6 @@ function submitInvoice(){
     document.getElementById('reviewComment').value = '';
     document.querySelectorAll('#starContainer i').forEach(el => el.classList.remove('active'));
     selectedRating = 0;
-
     document.getElementById('invoiceNumber').value='';
     document.getElementById('customerPhone').value='';
     document.getElementById('amount').value='';
@@ -799,14 +761,10 @@ function submitInvoice(){
     bankInput.value=''; bankInput.dataset.realValue='';
     document.getElementById('fileName').innerText='لم يتم اختيار ملف';
     uploadedFileName='';
-
     renderInvoiceHistory(); renderMerchantBalances(); updateAccount();
     if (loggedInMerchant) renderMerchantData();
 }
 
-// ============================================================
-//  استخدام الكاش باك
-// ============================================================
 function checkBalance() {
     const phone = document.getElementById('redeemPhone').value.trim();
     const bankCode = getRealValue('redeemBankCode');
@@ -857,9 +815,6 @@ function applyRedemption() {
     if (loggedInMerchant) renderMerchantData();
 }
 
-// ============================================================
-//  التقييم
-// ============================================================
 document.querySelectorAll('#starContainer i').forEach(star => {
     star.addEventListener('click', function(){
         const val = parseInt(this.dataset.value);
@@ -915,9 +870,6 @@ function renderMerchantBalances(){
     }).join('');
 }
 
-// ============================================================
-//  الطلبات
-// ============================================================
 function generateShopResponses(cat){
     const shops = { fashion:['Fashion Hub','Zara Men'], restaurants:['Pizza House','Sushi House'], bigfood:['Burger King','Big Meal'], electronics:['Tech Zone','CompuWorld'], car_parts:['قطع غيار الأهرام','التوكيل'], car_accessories:['كماليات السيارات','إكسسوارات'], car_repair:['ورشة الصيانة','مركز الخدمة'], clinics:['عيادة د. سمير','مركز الأسنان'], labs:['معمل المختبر','تحاليل دقيقة'], radiology:['مركز مصر للأشعة','أشعة متقدمة'], hospitals:['مستشفى النيل','المستشفى الدولي'] };
     const list = shops[cat] || ['Shop 1','Shop 2'];
@@ -945,9 +897,6 @@ function renderRequests(){
     }).join('');
 }
 
-// ============================================================
-//  لوحة التاجر
-// ============================================================
 function renderMerchantData(){
     if(!loggedInMerchant) return;
     const myInvoices = invoiceHistory.filter(inv => inv.bankCode === loggedInMerchant.bankCode || inv.merchant === loggedInMerchant.name);
@@ -959,12 +908,9 @@ function renderMerchantData(){
     document.getElementById('dashSales').innerText = sales.toFixed(2)+' ج';
     document.getElementById('dashCashback').innerText = cash.toFixed(2)+' ج';
     document.getElementById('dashOffers').innerText = myOffers.length;
-
-    // ✅ تحديث slider النسبة
     const currentRate = loggedInMerchant.cashbackRate || 25;
     document.getElementById('rateSlider').value = currentRate;
     updateRateDisplay(currentRate);
-
     const oc = document.getElementById('myOffersList');
     if(!myOffers.length) oc.innerHTML='<p style="color:#6b7280">لا توجد عروض</p>';
     else oc.innerHTML = myOffers.map(o => `<div class="merchant-offer-card"><div><span style="font-weight:600">${o.title}</span> <span style="color:#ff6b35;font-weight:700">${o.discount}</span></div><button class="del-btn" onclick="deleteMerchantOffer(${o.id})">🗑️</button></div>`).join('');
@@ -974,7 +920,6 @@ function renderMerchantData(){
     const ic = document.getElementById('merchantInvoicesList');
     if(!myInvoices.length) ic.innerHTML='<p style="color:#6b7280">لا توجد فواتير</p>';
     else ic.innerHTML = myInvoices.map(inv => `<div class="merchant-invoice-item"><strong>📄 #${inv.number}</strong><div style="font-size:13px;color:#6b7280">💰 ${inv.amount} ج | 💵 ${inv.cashback} ج | 📱 ${inv.customerPhone||'-'}</div></div>`).join('');
-
     const wc = document.getElementById('merchantWalletList');
     if(!wc) return;
     const myWallets = [];
@@ -988,7 +933,6 @@ function renderMerchantData(){
     else wc.innerHTML = myWallets.map(w => `<div class="merchant-customer-card">📱 ${w.phone}<br><span style="font-size:13px;color:#10b981;font-weight:600">💰 الرصيد: ${w.balance.toFixed(2)} ج</span><span style="font-size:12px;color:#6b7280"> | كسب: ${w.earned.toFixed(2)} | صرف: ${w.spent.toFixed(2)}</span></div>`).join('');
 }
 
-// ✅ دوال نسبة الكاش باك
 function updateRateDisplay(val) {
     const v = parseInt(val);
     document.getElementById('rateValueDisplay').innerText = v;
@@ -996,7 +940,6 @@ function updateRateDisplay(val) {
     const tierEl = document.getElementById('rateTierDisplay');
     tierEl.innerHTML = `${tier.name} <span style="font-size:12px;color:#6b7280">(كاش باك ${v}%)</span>`;
 }
-
 function saveCashbackRate() {
     if (!loggedInMerchant) { alert('❌ سجل دخول كتاجر'); return; }
     const newRate = parseInt(document.getElementById('rateSlider').value);
@@ -1010,13 +953,9 @@ function saveCashbackRate() {
     r.style.color = 'green';
     r.innerText = `✅ تم حفظ النسبة: ${newRate}%`;
     setTimeout(()=>{ r.innerText=''; }, 3000);
-    renderAll();
-    renderMerchantData();
+    renderAll(); renderMerchantData();
 }
 
-// ============================================================
-//  التقارير
-// ============================================================
 function showReport(period) {
     currentReportPeriod = period;
     document.querySelectorAll('.report-period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === period));
@@ -1077,9 +1016,6 @@ function exportReportPDF() {
     html2pdf().set(opt).from(element).save();
 }
 
-// ============================================================
-//  التحليلات
-// ============================================================
 function renderAnalytics(){
     if(!loggedInMerchant) return;
     const myInvoices = invoiceHistory.filter(inv => inv.bankCode === loggedInMerchant.bankCode || inv.merchant === loggedInMerchant.name);
@@ -1129,9 +1065,6 @@ function deleteMerchantOffer(id){
     renderAll(); renderMerchantData();
 }
 
-// ============================================================
-//  تسجيل الدخول/الخروج
-// ============================================================
 function setRole(role){
     currentRole = role;
     document.getElementById('roleCustomer').classList.toggle('active', role==='customer');
@@ -1216,9 +1149,6 @@ function updateAccount(){
     }
 }
 
-// ============================================================
-//  التنقل
-// ============================================================
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function(){
         const id = this.dataset.tab;
@@ -1270,18 +1200,12 @@ function renderAll(){
     if(!loggedInMerchant) filterDealsByRadius(r);
 }
 
-// ============================================================
-//  PWA
-// ============================================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then(r => console.log('✅ SW registered')).catch(e => console.log('❌ SW failed', e));
     });
 }
 
-// ============================================================
-//  بدء التشغيل
-// ============================================================
 window.addEventListener('load', function(){
     setTimeout(()=>document.getElementById('splash-screen').classList.add('hidden'), 1500);
     getLocation();
