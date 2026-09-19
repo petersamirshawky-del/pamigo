@@ -19,16 +19,8 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
 body{background:#f0f4f8;padding:16px;direction:rtl}
-#splash-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a2a6c,#2a4a7f);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:#fff;text-align:center;transition:opacity .8s,visibility .8s}
-#splash-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
-#splash-screen img{width:130px;height:130px;margin-bottom:15px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.3))}
-#splash-screen h1{font-size:42px;letter-spacing:4px;font-weight:700}
-#splash-screen p{font-size:18px;opacity:.8;margin-top:8px}
-#splash-screen .loader{margin-top:30px;width:50px;height:50px;border:4px solid rgba(255,255,255,.2);border-top:4px solid #ff6b35;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
 .header-left{display:flex;align-items:center;gap:12px}
-.header-left img{width:52px;height:52px;flex-shrink:0}
 .header h2{font-size:22px;color:#1a1a2e;margin:0}
 .header p{color:#6b7280;font-size:14px;display:flex;align-items:center;gap:5px}
 .header .location{background:#eef2f7;padding:8px 14px;border-radius:30px;font-size:14px;cursor:pointer}
@@ -39,7 +31,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 .tab-content{display:none}
 .tab-content.active{display:block}
 .card{background:#fff;padding:20px;border-radius:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.card input,.card select{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px;font-size:14px}
+.card input,.card select,.card textarea{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px;font-size:14px}
 .card button{width:100%;padding:12px;background:#1a2a6c;color:#fff;border:none;border-radius:30px;font-size:16px;font-weight:600;cursor:pointer}
 .card button:hover{background:#ff6b35}
 .login-box{max-width:400px;margin:0 auto}
@@ -133,7 +125,6 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 .rate-slider-container input[type=range]{width:100%;accent-color:#ff6b35;height:8px}
 .rate-display{text-align:center;font-size:32px;font-weight:700;color:#ff6b35;margin:10px 0}
 .rate-tier-display{text-align:center;font-size:18px;margin:8px 0;font-weight:600}
-/* Admin styles */
 .admin-header{background:linear-gradient(135deg,#8b0000,#c0392b);color:#fff;padding:20px;border-radius:16px;text-align:center;margin-bottom:20px}
 .admin-header h3{font-size:24px;margin-bottom:6px}
 .admin-header p{opacity:.9;font-size:14px}
@@ -152,23 +143,21 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 .admin-btn.warning{background:#f39c12;color:#fff}
 .admin-btn.danger{background:#e74c3c;color:#fff}
 .admin-btn.success{background:#27ae60;color:#fff}
+.admin-btn.purple{background:#8b5cf6;color:#fff}
 .frozen-badge{background:#95a5a6;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;margin-right:6px}
 .active-badge{background:#27ae60;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;margin-right:6px}
 .blocked-badge{background:#c0392b;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;margin-right:6px}
+.my-balance-banner{background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:20px;border-radius:16px;margin-bottom:16px;text-align:center;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+.my-balance-banner .lbl{font-size:14px;opacity:.9}
+.my-balance-banner .val{font-size:36px;font-weight:700;margin:6px 0}
+.my-balance-banner .sub{font-size:12px;opacity:.85}
 @media(max-width:480px){.deal-card{min-width:140px}.offers-grid{grid-template-columns:1fr 1fr}.analytics-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div id="splash-screen">
-<img src="logo.svg" alt="PAMIGO">
-<h1>PAMIGO</h1>
-<p>وصلك لأقرب خدمة</p>
-<div class="loader"></div>
-</div>
 
 <div class="header">
 <div class="header-left">
-<img src="logo.svg" alt="PAMIGO">
 <div>
 <h2 id="greetingTitle">PAMIGO</h2>
 <p><i class="fas fa-map-pin" style="color:#ff6b35"></i> <span id="locationText">جاري تحديد الموقع...</span></p>
@@ -191,9 +180,43 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 </div>
 
 <div class="tab-content active" id="tab-home">
+<div id="myBalanceBanner" class="my-balance-banner" style="display:none">
+<div class="lbl">💰 رصيدك الكلي من الكاش باك</div>
+<div class="val" id="totalBalanceValue">0 ج</div>
+<div class="sub">من <span id="balanceShopsCount">0</span> متجر</div>
+</div>
 <div class="radius-control">
 <label>🔍 نطاق البحث: <span id="radiusValue">2</span> كم</label>
 <input type="range" id="radiusSlider" min="0.5" max="10" step="0.5" value="2">
+<div style="margin-top:14px;border-top:1px solid #eee;padding-top:12px">
+<label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px">📊 ترتيب النتائج حسب:</label>
+<div class="categories" style="margin-bottom:0" id="sortOptions">
+<button class="category-chip active" data-sort="nearest">📍 الأقرب</button>
+<button class="category-chip" data-sort="cashback">💰 أعلى كاش باك</button>
+<button class="category-chip" data-sort="discount">🔥 أعلى خصم</button>
+</div>
+</div>
+<div style="margin-top:14px;border-top:1px solid #eee;padding-top:12px">
+<label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px">🏷️ نوع الخدمة (اختار أكتر من واحد):</label>
+<div class="categories" id="homeCategories" style="margin-bottom:0">
+<button class="category-chip active" data-home-cat="all">🌟 الكل</button>
+<button class="category-chip" data-home-cat="fashion">👗 ملابس</button>
+<button class="category-chip" data-home-cat="restaurants">🍕 مطاعم</button>
+<button class="category-chip" data-home-cat="bigfood">🍔 وجبات</button>
+<button class="category-chip" data-home-cat="electronics">📱 إلكترونيات</button>
+<button class="category-chip" data-home-cat="car_parts">🛞 قطع غيار</button>
+<button class="category-chip" data-home-cat="car_accessories">🪞 كماليات</button>
+<button class="category-chip" data-home-cat="car_repair">🔧 صيانة</button>
+<button class="category-chip" data-home-cat="clinics">🩺 عيادات</button>
+<button class="category-chip" data-home-cat="labs">🧪 معامل</button>
+<button class="category-chip" data-home-cat="radiology">📡 أشعة</button>
+<button class="category-chip" data-home-cat="hospitals">🏨 مستشفيات</button>
+</div>
+</div>
+<div id="subCategoriesWrapper" style="margin-top:12px;border-top:1px solid #eee;padding-top:12px;display:none">
+<label style="font-size:14px;font-weight:600;display:block;margin-bottom:8px">📂 تصنيفات فرعية:</label>
+<div class="categories" id="subCategories" style="margin-bottom:0"></div>
+</div>
 </div>
 <div class="search-bar">
 <i class="fas fa-search"></i>
@@ -241,6 +264,14 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 </select>
 <input type="text" id="requestProduct" placeholder="اسم المنتج أو الخدمة">
 <textarea id="requestDetails" placeholder="تفاصيل إضافية..."></textarea>
+<label style="margin-top:10px;font-size:14px;font-weight:600;display:block">📸 صورة (اختياري)</label>
+<div class="file-upload" onclick="document.getElementById('requestImage').click()">
+<i class="fas fa-camera" style="font-size:24px;color:#1a2a6c"></i>
+<p>اضغط لرفع صورة</p>
+<span class="file-name" id="requestFileName">لم يتم اختيار ملف</span>
+<input type="file" id="requestImage" accept="image/*" onchange="handleRequestImageUpload(event)">
+</div>
+<img id="requestImagePreview" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;border:2px solid #ddd;">
 <button onclick="sendSpecialRequest()" style="margin-top:8px">📤 إرسال الطلب للتجار</button>
 </div>
 <div class="section-title"><h3>📋 طلباتي المرسلة</h3></div>
@@ -251,14 +282,13 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div class="card">
 <h4 style="margin-bottom:10px">🧾 رفع فاتورة</h4>
 <input type="text" id="invoiceNumber" placeholder="رقم الفاتورة">
-<input type="text" id="customerPhone" placeholder="📱 رقم هاتف العميل (للكاش باك)">
+<input type="text" id="customerPhone" placeholder="📱 رقم هاتف العميل">
 <input type="number" id="amount" placeholder="المبلغ">
-<label style="margin-top:10px;font-size:14px;font-weight:600;display:block">🔑 البنكود (يدخله الكاشير)</label>
+<label style="margin-top:10px;font-size:14px;font-weight:600;display:block">🔑 البنكود</label>
 <input type="text" id="bankCode" placeholder="أدخل البنكود" autocomplete="off" inputmode="text">
-<div style="font-size:12px;color:#6b7280;margin-top:4px">* البنكود إجباري.</div>
 <div class="file-upload" onclick="document.getElementById('invoiceFile').click()">
 <i class="fas fa-cloud-upload-alt" style="font-size:24px;color:#1a2a6c"></i>
-<p>اضغط لرفع صورة الفاتورة</p>
+<p>اضغط لرفع صورة الفاتورة (اختياري)</p>
 <span class="file-name" id="fileName">لم يتم اختيار ملف</span>
 <input type="file" id="invoiceFile" accept="image/*" onchange="handleFileUpload(event)">
 </div>
@@ -281,13 +311,12 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 </div>
 <div class="card">
 <h4 style="margin-bottom:10px">💵 استخدام رصيد الكاش باك</h4>
-<p style="font-size:13px;color:#6b7280;margin-bottom:8px">يدخل الكاشير رقم هاتف العميل والبنكود لعرض الرصيد واستخدامه</p>
 <input type="text" id="redeemPhone" placeholder="📱 رقم هاتف العميل" autocomplete="off">
 <input type="text" id="redeemBankCode" placeholder="🔑 بنكود التاجر" autocomplete="off" inputmode="text">
 <button onclick="checkBalance()" style="margin-top:8px">🔍 عرض رصيد العميل</button>
 <div id="balanceResult" style="margin-top:12px"></div>
 </div>
-<div class="card"><h4 style="margin-bottom:10px">💰 أرصدتي المجمعة</h4><div id="merchantBalances"><p style="color:#6b7280;font-size:14px">لا توجد فواتير حتى الآن</p></div></div>
+<div class="card"><h4 style="margin-bottom:10px">💰 أرصدتي المجمعة</h4><div id="merchantBalances"><p style="color:#6b7280;font-size:14px">لا توجد فواتير</p></div></div>
 <div class="card"><h4 style="margin-bottom:10px">📊 آخر الفواتير</h4><div id="invoiceHistory"><p style="color:#6b7280;font-size:14px">لا توجد فواتير</p></div></div>
 </div>
 
@@ -297,21 +326,44 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div class="stats">
 <div class="stat">👥 العملاء: <span id="dashCust">0</span></div>
 <div class="stat">💰 المبيعات: <span id="dashSales">0 ج</span></div>
-<div class="stat">💵 كاش باك: <span id="dashCashback">0 ج</span></div>
 <div class="stat">🎁 عروضي: <span id="dashOffers">0</span></div>
 </div>
+<div style="background:#fff;border-radius:16px;padding:16px;margin-top:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)">
+<h5 style="margin-bottom:12px;color:#1a2a6c">💵 ملخص الكاش باك</h5>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="background:#dbeafe;padding:12px;border-radius:10px;text-align:center">
+<div style="font-size:11px;color:#1e40af">ممنوح للعملاء</div>
+<div style="font-size:20px;font-weight:700;color:#1e40af;margin-top:4px" id="dashCashbackGiven">0 ج</div>
+</div>
+<div style="background:#fef3c7;padding:12px;border-radius:10px;text-align:center">
+<div style="font-size:11px;color:#92400e">مصروف</div>
+<div style="font-size:20px;font-weight:700;color:#92400e;margin-top:4px" id="dashCashbackSpent">0 ج</div>
+</div>
+<div style="background:#fee2e2;padding:12px;border-radius:10px;text-align:center">
+<div style="font-size:11px;color:#991b1b">التزام متبقي</div>
+<div style="font-size:20px;font-weight:700;color:#991b1b;margin-top:4px" id="dashCashbackRemaining">0 ج</div>
+</div>
+<div style="background:#d1fae5;padding:12px;border-radius:10px;text-align:center">
+<div style="font-size:11px;color:#065f46">صافي بعد الكاش باك</div>
+<div style="font-size:20px;font-weight:700;color:#065f46;margin-top:4px" id="dashNetSales">0 ج</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card" style="border-right:4px solid #8b5cf6">
+<h4 style="margin-bottom:10px">🏷️ تصنيفات متجري الفرعية</h4>
+<p style="font-size:13px;color:#6b7280;margin-bottom:10px">اختار إيه اللي بتقدمه بالظبط.</p>
+<div id="merchantSubCategoriesContainer"><p style="color:#6b7280;font-size:14px">جاري التحميل...</p></div>
+<button onclick="saveMerchantSubCategories()" style="margin-top:10px;background:#8b5cf6">💾 حفظ التصنيفات</button>
+<div id="subCategorySaveResult" style="margin-top:8px;font-weight:bold;text-align:center"></div>
 </div>
 <div class="card" style="border-right:4px solid #ff6b35">
 <h4 style="margin-bottom:10px">💰 نسبة الكاش باك بتاعتك</h4>
-<p style="font-size:13px;color:#6b7280;margin-bottom:10px">اختار النسبة اللي تناسبك. كل ما تزود، كل ما محلك يظهر أول للعملاء.</p>
 <div class="rate-slider-container">
 <div class="rate-display"><span id="rateValueDisplay">15</span>%</div>
 <div class="rate-tier-display" id="rateTierDisplay">🥈 مميز</div>
 <input type="range" id="rateSlider" min="1" max="50" step="1" value="15" oninput="updateRateDisplay(this.value)">
-<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-top:5px">
-<span>1% (الحد الأدنى)</span>
-<span>50% (الحد الأقصى)</span>
-</div>
+<div style="display:flex;justify-content:space-between;font-size:11px;color:#6b7280;margin-top:5px"><span>1%</span><span>50%</span></div>
 </div>
 <button onclick="saveCashbackRate()" style="margin-top:10px;background:#10b981">💾 حفظ النسبة</button>
 <div id="rateSaveResult" style="margin-top:8px;font-weight:bold;text-align:center"></div>
@@ -367,7 +419,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div class="stat">💵 كاش باك مصروف<br><strong id="repCashbackSpent">0 ج</strong></div>
 </div>
 <div id="reportDetails"></div>
-<button onclick="exportReportPDF()" style="margin-top:15px;background:#10b981">📥 تصدير التقرير PDF</button>
+<button onclick="exportReportPDF()" style="margin-top:15px;background:#10b981">📥 تصدير PDF</button>
 </div>
 </div>
 
@@ -378,7 +430,7 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div class="analytics-card"><div class="label">إجمالي العملاء</div><div class="value" id="anaTotalCustomers">0</div></div>
 <div class="analytics-card"><div class="label">متوسط الإنفاق</div><div class="value" id="anaAvgSpend">0 ج</div></div>
 <div class="analytics-card"><div class="label">أكثر يوم مبيعات</div><div class="value" id="anaTopDay">-</div></div>
-<div class="analytics-card"><div class="label">أكثر ساعة مبيعات</div><div class="value" id="anaTopHour">-</div></div>
+<div class="analytics-card"><div class="label">أكثر ساعة</div><div class="value" id="anaTopHour">-</div></div>
 <div class="analytics-card"><div class="label">العرض الأكثر تأثيراً</div><div class="value" id="anaTopOffer">-</div></div>
 <div class="analytics-card"><div class="label">متوسط التقييم</div><div class="value" id="anaAvgRating">-</div></div>
 <div class="analytics-card"><div class="label">العملاء المتكررون</div><div class="value" id="anaRepeatCustomers">0</div></div>
@@ -387,7 +439,6 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 </div>
 </div>
 
-<!-- ✅ لوحة الأدمن -->
 <div class="tab-content" id="tab-admin">
 <div class="admin-header">
 <h3>👑 لوحة الأدمن</h3>
@@ -400,7 +451,6 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <button class="admin-subtab" data-admin="invoices" onclick="showAdminSection('invoices')">🧾 الفواتير</button>
 <button class="admin-subtab" data-admin="notifications" onclick="showAdminSection('notifications')">📢 إشعارات</button>
 </div>
-
 <div class="admin-section active" id="admin-dashboard">
 <div class="card">
 <h4 style="margin-bottom:15px">📊 إحصائيات المنصة</h4>
@@ -418,43 +468,66 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 </div>
 </div>
 </div>
-
 <div class="admin-section" id="admin-traders">
 <div class="card">
 <h4 style="margin-bottom:15px">🏪 إدارة التجار</h4>
+<button onclick="showAddTraderForm()" style="background:#27ae60;margin-bottom:15px">➕ إضافة تاجر جديد</button>
+<div id="addTraderForm" style="display:none;background:#f9fafb;padding:15px;border-radius:12px;margin-bottom:15px;border-right:4px solid #27ae60">
+<h5 style="margin-bottom:10px;color:#1a2a6c">➕ إضافة تاجر جديد</h5>
+<input type="text" id="newTraderName" placeholder="اسم التاجر" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<input type="text" id="newTraderBankCode" placeholder="البنكود (مثال: MERCH-MNS13)" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<input type="text" id="newTraderPhone" placeholder="رقم الموبايل" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<select id="newTraderCategory" onchange="updateNewTraderSubCategories()" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<option value="fashion">👗 ملابس</option>
+<option value="restaurants">🍕 مطاعم</option>
+<option value="bigfood">🍔 وجبات</option>
+<option value="electronics">📱 إلكترونيات</option>
+<option value="car_parts">🛞 قطع غيار</option>
+<option value="car_accessories">🪞 كماليات</option>
+<option value="car_repair">🔧 صيانة</option>
+<option value="clinics">🩺 عيادات</option>
+<option value="labs">🧪 معامل</option>
+<option value="radiology">📡 أشعة</option>
+<option value="hospitals">🏨 مستشفيات</option>
+</select>
+<label style="font-size:13px;font-weight:600;display:block;margin-top:8px">التصنيفات الفرعية:</label>
+<div id="newTraderSubCategories" class="categories" style="margin-bottom:0"></div>
+<input type="number" id="newTraderLat" placeholder="Latitude" step="0.0001" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<input type="number" id="newTraderLng" placeholder="Longitude" step="0.0001" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<input type="number" id="newTraderRate" placeholder="نسبة الكاش باك (1-50)" min="1" max="50" value="15" style="width:100%;padding:10px;margin:4px 0;border:1px solid #ddd;border-radius:8px">
+<div style="display:flex;gap:8px;margin-top:10px">
+<button onclick="addNewTrader()" style="flex:1;background:#27ae60">✅ إضافة</button>
+<button onclick="hideAddTraderForm()" style="flex:1;background:#95a5a6">❌ إلغاء</button>
+</div>
+<div id="addTraderResult" style="margin-top:8px;font-weight:bold;text-align:center"></div>
+</div>
 <div id="adminTradersList"></div>
 </div>
 </div>
-
 <div class="admin-section" id="admin-customers">
-<div class="card">
-<h4 style="margin-bottom:15px">👥 إدارة العملاء</h4>
-<div id="adminCustomersList"></div>
+<div class="card"><h4 style="margin-bottom:15px">👥 إدارة العملاء</h4><div id="adminCustomersList"></div></div>
 </div>
-</div>
-
 <div class="admin-section" id="admin-invoices">
 <div class="card">
 <h4 style="margin-bottom:15px">🧾 كل الفواتير</h4>
-<input type="text" id="adminInvoiceSearch" placeholder="🔍 ابحث برقم الفاتورة أو اسم التاجر..." oninput="renderAdminInvoices()" style="margin-bottom:10px">
+<input type="text" id="adminInvoiceSearch" placeholder="🔍 ابحث..." oninput="renderAdminInvoices()" style="margin-bottom:10px">
 <div id="adminInvoicesList"></div>
 </div>
 </div>
-
 <div class="admin-section" id="admin-notifications">
 <div class="card">
 <h4 style="margin-bottom:15px">📢 إرسال إشعار جماعي</h4>
 <input type="text" id="notifTitle" placeholder="عنوان الإشعار">
 <textarea id="notifMessage" placeholder="نص الإشعار" style="width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px;min-height:80px"></textarea>
 <select id="notifTarget">
-<option value="all">الكل (عملاء + تجار)</option>
+<option value="all">الكل</option>
 <option value="customers">العملاء فقط</option>
 <option value="merchants">التجار فقط</option>
 </select>
-<button onclick="sendAdminNotification()" style="background:#c0392b;margin-top:8px">📤 إرسال الإشعار</button>
+<button onclick="sendAdminNotification()" style="background:#c0392b;margin-top:8px">📤 إرسال</button>
 <div id="notifResult" style="margin-top:8px;font-weight:bold;text-align:center"></div>
 <div style="border-top:1px solid #ddd;margin-top:15px;padding-top:15px">
-<h5 style="margin-bottom:10px">📋 الإشعارات المرسلة سابقاً</h5>
+<h5 style="margin-bottom:10px">📋 الإشعارات المرسلة</h5>
 <div id="adminNotifHistory"><p style="color:#6b7280">لا توجد إشعارات</p></div>
 </div>
 </div>
@@ -470,11 +543,15 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>عدد الفواتير</span><span id="invoiceCount">-</span></div>
 <div style="display:flex;justify-content:space-between;padding:8px 0;margin-top:8px"><span>📍 الموقع</span><span id="accLocation">غير محدد</span></div>
 </div>
+<div class="card" id="myWalletsCard" style="display:none">
+<h4 style="margin-bottom:15px">💰 تفصيل رصيدي في كل متجر</h4>
+<div id="customerWalletsBreakdown"></div>
+</div>
 <div class="card">
-<h4 id="pickerTitle" style="margin-bottom:8px">📍 حدد موقعك بالضبط على الخريطة</h4>
-<p id="pickerHint" style="font-size:13px;color:#6b7280;margin-bottom:8px">اضغط على الخريطة أو حرك الدبوس، أو ابحث بالعنوان</p>
+<h4 id="pickerTitle" style="margin-bottom:8px">📍 حدد موقعك</h4>
+<p id="pickerHint" style="font-size:13px;color:#6b7280;margin-bottom:8px">اضغط على الخريطة أو ابحث بالعنوان</p>
 <div class="location-search-box">
-<input type="text" id="addressSearch" placeholder="ابحث بالعنوان (مثال: طنطا، شارع البحر)">
+<input type="text" id="addressSearch" placeholder="ابحث بالعنوان">
 <button onclick="searchAddress()">🔍</button>
 </div>
 <div id="searchResult" style="font-size:13px;color:#6b7280;margin-bottom:8px"></div>
@@ -495,14 +572,17 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <input type="text" id="loginPhone" placeholder="رقم الهاتف">
 <input type="text" id="loginPassword" placeholder="كلمة المرور" autocomplete="off">
 <div id="bankCodeGroup" style="display:none">
-<input type="text" id="loginBankCode" placeholder="البنكود (مثال: MERCH-12345)" autocomplete="off" inputmode="text">
+<div style="position:relative;width:100%">
+<input type="password" id="loginBankCode" placeholder="البنكود" autocomplete="off" inputmode="text" style="padding-left:45px">
+<button type="button" onclick="toggleBankCodeVisibility()" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;font-size:20px;cursor:pointer;width:auto;padding:4px;color:#6b7280" title="إظهار / إخفاء">👁️</button>
+</div>
 </div>
 <button onclick="handleLogin()" style="margin-top:10px">🚀 دخول</button>
 <p id="loginResult" style="margin-top:10px;text-align:center;font-weight:bold"></p>
 </div>
 </div>
 
-<div class="footer">PAMIGO v33.0 -- مع لوحة الأدمن</div>
+<div class="footer">PAMIGO v35.0 -- مع لوحة الأدمن الكاملة</div>
 
 <div class="modal-overlay" id="merchantModal" onclick="closeModal(event)">
 <div class="modal-box" onclick="event.stopPropagation()">
@@ -510,61 +590,143 @@ body{background:#f0f4f8;padding:16px;direction:rtl}
 <h3 id="modalMerchantName">اسم التاجر</h3>
 <div class="merchant-info" id="modalMerchantInfo"></div>
 <div id="modalOffersList"></div>
-<button class="map-link-btn" onclick="openMerchantOnMap()">📍 عرض الموقع على الخريطة</button>
+<button class="map-link-btn" onclick="openMerchantOnMap()">📍 عرض الموقع</button>
 </div>
 </div>
-
 <script>
 // ============================================================
 // الإعدادات
 // ============================================================
 const ADMIN_BANK_CODE = 'PETAD-12321';
-const STORAGE_KEY = 'pamigo_merchants_v10';
+const STORAGE_KEY = 'pamigo_merchants_v13';
 const ADMIN_STORAGE = 'pamigo_admin_data_v1';
+const CUSTOMER_STORAGE = 'pamigo_customers_v1';
 
 const defaultMerchants = [
-{ bankCode:'MERCH-12345', name:'متجر أحمد للملابس', phone:'+20 100 111 111', category:'fashion', icon:'👗', lat:30.789, lng:31.001, cashbackRate:30, offers:[
-{id:101,title:'خصم 20% على الملابس الصيفية',discount:'20% OFF'},
-{id:102,title:'عرض 2+1 على القمصان',discount:'2+1'},
-{id:103,title:'خصم 15% على البناطلين',discount:'15% OFF'}
+{ bankCode:'MERCH-MNS01', name:'مطعم الشرقاوي للمشويات', phone:'+20 100 111 222', category:'restaurants', subCategory:['grills'], icon:'🍖', lat:31.041, lng:31.379, cashbackRate:20, offers:[
+{id:101,title:'خصم 20% على الوجبات العائلية',discount:'20% OFF'},
+{id:102,title:'عرض 2+1 على السندوتشات',discount:'2+1'}
 ]},
-{ bankCode:'MERCH-67890', name:'مطعم البيتزا', phone:'+20 100 222 222', category:'restaurants', icon:'🍕', lat:30.785, lng:31.005, cashbackRate:20, offers:[
-{id:201,title:'خصم 30% على البيتزا الكبيرة',discount:'30% OFF'},
-{id:202,title:'عرض العائلة',discount:'خصم 40%'}
+{ bankCode:'MERCH-MNS02', name:'كافيه الميدان', phone:'+20 100 222 333', category:'restaurants', subCategory:['desserts'], icon:'☕', lat:31.039, lng:31.377, cashbackRate:25, offers:[
+{id:201,title:'1+1 قهوة',discount:'1+1'},
+{id:202,title:'خصم 15% على الحلويات',discount:'15% OFF'}
 ]},
-{ bankCode:'MERCH-11111', name:'سوق الخضار', phone:'+20 100 333 333', category:'bigfood', icon:'🛒', lat:30.788, lng:31.003, cashbackRate:15, offers:[
-{id:301,title:'خصم 20% على المنتجات الطازجة',discount:'20% OFF'},
-{id:302,title:'عرض 2+1 على الفواكه',discount:'2+1'}
+{ bankCode:'MERCH-MNS03', name:'ملابس المنصورة سنتر', phone:'+20 100 333 444', category:'fashion', subCategory:['men','women'], icon:'👗', lat:31.042, lng:31.381, cashbackRate:30, offers:[
+{id:301,title:'خصم 30% على الملابس الصيفية',discount:'30% OFF'},
+{id:302,title:'عرض 2+1 على القمصان',discount:'2+1'}
 ]},
-{ bankCode:'MERCH-22222', name:'كافيه موكا', phone:'+20 100 444 444', category:'coffee', icon:'☕', lat:30.786, lng:31.008, cashbackRate:25, offers:[
-{id:401,title:'1+1 قهوة',discount:'1+1'},
-{id:402,title:'خصم 20% على الحلويات',discount:'20% OFF'}
+{ bankCode:'MERCH-MNS04', name:'سوبر ماركت الأمانة', phone:'+20 100 444 555', category:'bigfood', subCategory:['supermarket'], icon:'🛒', lat:31.038, lng:31.375, cashbackRate:15, offers:[
+{id:401,title:'خصم 10% على المنتجات الطازجة',discount:'10% OFF'},
+{id:402,title:'عرض 2+1 على الألبان',discount:'2+1'}
 ]},
-{ bankCode:'MERCH-33333', name:'عيادة د. سمير', phone:'+20 100 555 555', category:'clinics', icon:'🩺', lat:30.784, lng:31.006, cashbackRate:20, offers:[
-{id:501,title:'خصم 20% على الكشف',discount:'20% OFF'}
+{ bankCode:'MERCH-MNS05', name:'صيدلية العزبي فرع المنصورة', phone:'+20 100 555 666', category:'clinics', subCategory:['internal'], icon:'💊', lat:31.040, lng:31.382, cashbackRate:20, offers:[
+{id:501,title:'خصم 15% على الأدوية',discount:'15% OFF'}
 ]},
-{ bankCode:'MERCH-44444', name:'معمل المختبر', phone:'+20 100 666 666', category:'labs', icon:'🧪', lat:30.783, lng:31.009, cashbackRate:15, offers:[
-{id:601,title:'تحاليل شاملة',discount:'15% OFF'}
+{ bankCode:'MERCH-MNS06', name:'معمل المختبر فرع المنصورة', phone:'+20 100 666 777', category:'labs', subCategory:['blood'], icon:'🧪', lat:31.043, lng:31.378, cashbackRate:10, offers:[
+{id:601,title:'تحاليل شاملة بخصم 20%',discount:'20% OFF'}
 ]},
-{ bankCode:'MERCH-55555', name:'مركز مصر للأشعة', phone:'+20 100 777 777', category:'radiology', icon:'📡', lat:30.788, lng:31.014, cashbackRate:10, offers:[
-{id:701,title:'أشعة مقطعية',discount:'10% OFF'}
+{ bankCode:'MERCH-MNS07', name:'مركز المنصورة للأشعة', phone:'+20 100 777 888', category:'radiology', subCategory:['ct'], icon:'📡', lat:31.037, lng:31.383, cashbackRate:10, offers:[
+{id:701,title:'خصم 10% على الأشعة',discount:'10% OFF'}
 ]},
-{ bankCode:'MERCH-66666', name:'مستشفى النيل', phone:'+20 100 888 888', category:'hospitals', icon:'🏨', lat:30.780, lng:31.016, cashbackRate:10, offers:[
-{id:801,title:'خصم 5% على الخدمات',discount:'5% OFF'}
+{ bankCode:'MERCH-MNS08', name:'مستشفى المنصورة العام', phone:'+20 100 888 999', category:'hospitals', subCategory:['er'], icon:'🏨', lat:31.045, lng:31.376, cashbackRate:5, offers:[
+{id:801,title:'خصم 5% على الخدمات الطبية',discount:'5% OFF'}
 ]},
-{ bankCode:'MERCH-77777', name:'قطع غيار الأهرام', phone:'+20 100 999 999', category:'car_parts', icon:'🛞', lat:30.792, lng:31.015, cashbackRate:15, offers:[
-{id:901,title:'قطع غيار أصلية',discount:'15% OFF'}
+{ bankCode:'MERCH-MNS09', name:'قطع غيار المنصورة', phone:'+20 100 999 000', category:'car_parts', subCategory:['engines'], icon:'🛞', lat:31.036, lng:31.380, cashbackRate:15, offers:[
+{id:901,title:'خصم 15% على قطع الغيار',discount:'15% OFF'}
 ]},
-{ bankCode:'MERCH-88888', name:'كماليات السيارات', phone:'+20 101 000 000', category:'car_accessories', icon:'🪞', lat:30.795, lng:31.018, cashbackRate:20, offers:[
-{id:1001,title:'إكسسوارات سيارة',discount:'20% OFF'}
+{ bankCode:'MERCH-MNS10', name:'مركز صيانة السيارات', phone:'+20 101 111 222', category:'car_repair', subCategory:['mechanics'], icon:'🔧', lat:31.044, lng:31.384, cashbackRate:20, offers:[
+{id:1001,title:'خصم 20% على الصيانة الدورية',discount:'20% OFF'}
 ]},
-{ bankCode:'MERCH-99999', name:'ورشة الصيانة', phone:'+20 101 111 111', category:'car_repair', icon:'🔧', lat:30.790, lng:31.013, cashbackRate:10, offers:[
-{id:1101,title:'صيانة دورية',discount:'10% OFF'}
+{ bankCode:'MERCH-MNS11', name:'إلكترونيات المنصورة', phone:'+20 101 222 333', category:'electronics', subCategory:['mobiles','laptops','headphones'], icon:'📱', lat:31.039, lng:31.373, cashbackRate:25, offers:[
+{id:1101,title:'خصم 25% على الإكسسوارات',discount:'25% OFF'},
+{id:1102,title:'خصم 10% على الموبايلات',discount:'10% OFF'}
+]},
+{ bankCode:'MERCH-MNS12', name:'كماليات السيارات الحديثة', phone:'+20 101 333 444', category:'car_accessories', subCategory:['interior','exterior'], icon:'🪞', lat:31.041, lng:31.385, cashbackRate:20, offers:[
+{id:1201,title:'خصم 20% على الكماليات',discount:'20% OFF'}
 ]}
 ];
 
+const SUB_CATEGORIES = {
+fashion: [
+{id:'men', name:'👔 رجالي'},
+{id:'women', name:'👗 حريمي'},
+{id:'kids', name:'🧒 أطفال'},
+{id:'shoes', name:'👟 أحذية'},
+{id:'accessories', name:'👜 إكسسوارات'}
+],
+restaurants: [
+{id:'grills', name:'🍖 مشويات'},
+{id:'pizza', name:'🍕 بيتزا'},
+{id:'koshary', name:'🍲 كشري'},
+{id:'seafood', name:'🐟 بحري'},
+{id:'desserts', name:'🍰 حلويات'}
+],
+bigfood: [
+{id:'supermarket', name:'🛒 سوبر ماركت'},
+{id:'grocery', name:'🏪 بقالة'},
+{id:'veggies', name:'🥬 خضار وفاكهة'},
+{id:'meat', name:'🥩 لحوم'},
+{id:'dairy', name:'🥛 ألبان'}
+],
+electronics: [
+{id:'mobiles', name:'📱 موبايلات'},
+{id:'laptops', name:'💻 لابتوبات'},
+{id:'headphones', name:'🎧 سماعات'},
+{id:'chargers', name:'🔌 شواحن'},
+{id:'accessories', name:'🖱️ إكسسوارات'}
+],
+car_parts: [
+{id:'engines', name:'⚙️ محركات'},
+{id:'brakes', name:'🛑 فرامل'},
+{id:'electrical', name:'🔌 كهرباء'},
+{id:'tires', name:'🛞 إطارات'},
+{id:'oils', name:'🛢️ زيوت'}
+],
+car_accessories: [
+{id:'interior', name:'🪑 كماليات داخلية'},
+{id:'exterior', name:'🚗 كماليات خارجية'},
+{id:'audio', name:'🔊 صوتيات'},
+{id:'floor', name:'🧶 فرش'}
+],
+car_repair: [
+{id:'mechanics', name:'🔧 ميكانيكا'},
+{id:'electrical', name:'⚡ كهرباء سيارات'},
+{id:'bodywork', name:'🔨 سمكرة'},
+{id:'paint', name:'🎨 دهان'}
+],
+clinics: [
+{id:'dental', name:'🦷 أسنان'},
+{id:'internal', name:'🩺 باطنة'},
+{id:'pediatric', name:'👶 أطفال'},
+{id:'derma', name:'🧴 جلدية'},
+{id:'eyes', name:'👁️ عيون'}
+],
+labs: [
+{id:'blood', name:'🩸 تحاليل دم'},
+{id:'urine', name:'🧪 تحاليل بول'},
+{id:'hormones', name:'💉 هرمونات'},
+{id:'micro', name:'🔬 ميكروبيولوجي'}
+],
+radiology: [
+{id:'xray', name:'📷 أشعة عادية'},
+{id:'ct', name:'📡 مقطعية'},
+{id:'mri', name:'🧲 رنين مغناطيسي'},
+{id:'ultrasound', name:'🫀 موجات صوتية'}
+],
+hospitals: [
+{id:'er', name:'🚨 طوارئ'},
+{id:'surgery', name:'🏥 عمليات'},
+{id:'internal', name:'🛏️ أقسام داخلية'},
+{id:'outpatient', name:'🚶 عيادات خارجية'}
+]
+};
+
 let merchants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultMerchants));
 function saveMerchants(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(merchants)); }
+
+// ✅ كائن لحفظ بيانات العملاء (الاسم، الموبايل)
+let customerData = JSON.parse(localStorage.getItem(CUSTOMER_STORAGE)) || {};
+function saveCustomerData(){ localStorage.setItem(CUSTOMER_STORAGE, JSON.stringify(customerData)); }
 
 let adminData = JSON.parse(localStorage.getItem(ADMIN_STORAGE)) || {
 frozenTraders: [],
@@ -655,17 +817,54 @@ let loggedInMerchant = null;
 let lastRatedMerchant = '';
 let selectedRating = 0;
 let uploadedFileName = '';
+let uploadedRequestImage = '';
+let uploadedRequestImageBase64 = '';
 let ratings = JSON.parse(localStorage.getItem('pamigo_ratings')) || {};
 let currentModalMerchant = null;
 let pickerMap = null, pickerMarker = null;
 let currentReportPeriod = 'all';
+let currentHomeCategory = ['all'];
+let currentSubCategory = [];
+let currentSortBy = 'nearest';
 
 function saveInvoices(){ localStorage.setItem('pamigo_invoices', JSON.stringify(invoiceHistory)); }
 function saveRatings(){ localStorage.setItem('pamigo_ratings', JSON.stringify(ratings)); }
 
 function getMerchantRating(n){ if(!ratings[n]) return null; const t = ratings[n].reduce((s,r)=>s+r.stars,0); return (t/ratings[n].length).toFixed(1); }
-function getMerchantRatingCount(n){ return ratings[n]?ratings[n].length:0; }
 function renderStars(r){ if(!r) return ''; let h=''; for(let i=0;i<Math.floor(r);i++) h+='⭐'; return h; }
+
+function getDiscountValue(discountStr){
+if(!discountStr) return 0;
+const match = discountStr.match(/(\d+)/);
+return match ? parseInt(match[1]) : 0;
+}
+
+function getMaxDiscount(m){
+if(!m.offers || !m.offers.length) return 0;
+return Math.max(...m.offers.map(o => getDiscountValue(o.discount)));
+}
+
+function merchantMatchesSubCategory(m){
+if(currentSubCategory.length === 0) return true;
+const mSub = m.subCategory;
+if(!mSub) return false;
+if(Array.isArray(mSub)){
+return mSub.some(s => currentSubCategory.includes(s));
+}
+return currentSubCategory.includes(mSub);
+}
+
+function getSubCategoryNames(m){
+const cat = m.category;
+const subs = m.subCategory;
+if(!subs || !subs.length) return '';
+const subList = SUB_CATEGORIES[cat] || [];
+const arr = Array.isArray(subs) ? subs : [subs];
+return arr.map(s => {
+const found = subList.find(x => x.id === s);
+return found ? found.name : s;
+}).join(', ');
+}
 
 function getLocation(){
 const el = document.getElementById('locationText');
@@ -686,7 +885,7 @@ renderDeals();
 
 function onError(err) {
 if(err.code === 3 && highAccuracyOptions.enableHighAccuracy) {
-el.innerText = '⏳ جاري تحديد الموقع (محاولة تانية)...';
+el.innerText = '⏳ جاري تحديد الموقع...';
 navigator.geolocation.getCurrentPosition(onSuccess, onFinalError, lowAccuracyOptions);
 return;
 }
@@ -695,9 +894,9 @@ onFinalError(err);
 
 function onFinalError(err) {
 let msg = '❌ تعذر تحديد الموقع';
-if(err.code === 1) msg = '❌ تم رفض إذن الموقع. تأكد من إعدادات الموبايل';
-else if(err.code === 2) msg = '❌ الموقع غير متاح حالياً';
-else if(err.code === 3) msg = '❌ انتهت المهلة. جرب في مكان مفتوح';
+if(err.code === 1) msg = '❌ تم رفض إذن الموقع';
+else if(err.code === 2) msg = '❌ الموقع غير متاح';
+else if(err.code === 3) msg = '❌ انتهت المهلة';
 el.innerText = msg;
 }
 
@@ -710,21 +909,195 @@ const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI
 return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
+function renderSubCategories(){
+const wrapper = document.getElementById('subCategoriesWrapper');
+const container = document.getElementById('subCategories');
+if(!wrapper || !container) return;
+
+const mainCat = currentHomeCategory.length === 1 ? currentHomeCategory[0] : null;
+
+if(!mainCat || mainCat === 'all' || !SUB_CATEGORIES[mainCat]){
+wrapper.style.display = 'none';
+currentSubCategory = [];
+return;
+}
+
+wrapper.style.display = 'block';
+container.innerHTML = SUB_CATEGORIES[mainCat].map(sub => 
+`<button class="category-chip ${currentSubCategory.includes(sub.id) ? 'active' : ''}" data-sub-cat="${sub.id}">${sub.name}</button>`
+).join('');
+
+container.querySelectorAll('.category-chip').forEach(btn => {
+btn.addEventListener('click', function(){
+const subId = this.dataset.subCat;
+if(currentSubCategory.includes(subId)){
+currentSubCategory = currentSubCategory.filter(c => c !== subId);
+this.classList.remove('active');
+} else {
+currentSubCategory.push(subId);
+this.classList.add('active');
+}
+filterDealsByRadius(parseFloat(document.getElementById('radiusSlider').value));
+});
+});
+}
+
+function renderMerchantSubCategories(){
+const container = document.getElementById('merchantSubCategoriesContainer');
+if(!container || !loggedInMerchant) return;
+
+const mainCat = loggedInMerchant.category;
+const subs = SUB_CATEGORIES[mainCat] || [];
+
+if(!subs.length){
+container.innerHTML = '<p style="color:#6b7280;font-size:14px">التصنيف الرئيسي بتاعك مفيهوش تصنيفات فرعية.</p>';
+return;
+}
+
+const currentSubs = Array.isArray(loggedInMerchant.subCategory) 
+? loggedInMerchant.subCategory 
+: (loggedInMerchant.subCategory ? [loggedInMerchant.subCategory] : []);
+
+const selectedNames = currentSubs.map(id => {
+const s = subs.find(x => x.id === id);
+return s ? s.name : id;
+});
+
+let currentBanner = '';
+if(currentSubs.length > 0){
+currentBanner = `
+<div style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px;border-radius:12px;margin-bottom:14px;box-shadow:0 4px 12px rgba(16,185,129,.3)">
+<div style="font-size:12px;opacity:.9;margin-bottom:6px">✅ إنت بتبيع حالياً:</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+${selectedNames.map(n => `<span style="background:rgba(255,255,255,.25);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600">${n}</span>`).join('')}
+</div>
+</div>
+`;
+} else {
+currentBanner = `
+<div style="background:#fee2e2;color:#991b1b;padding:14px;border-radius:12px;margin-bottom:14px;border-right:4px solid #ef4444">
+<div style="font-weight:700">⚠️ مفيش تصنيفات مختارة لحد دلوقتي</div>
+<div style="font-size:12px;margin-top:4px">اختار من الأزرار اللي تحت إنت بتبيع إيه.</div>
+</div>
+`;
+}
+
+container.innerHTML = `
+${currentBanner}
+<div style="margin-bottom:10px;padding:8px 12px;background:#ede9fe;border-radius:10px;font-size:14px;color:#5b21b6;font-weight:700" id="subCatCounter">
+📊 اخترت ${currentSubs.length} من ${subs.length} تصنيف
+</div>
+<div class="categories" style="margin-bottom:0" id="subCatChips">
+${subs.map(s => {
+const isSelected = currentSubs.includes(s.id);
+if(isSelected){
+return `<button class="category-chip" data-merchant-sub="${s.id}" data-active="true" style="background:#8b5cf6;color:#fff;border:2px solid #6d28d9;font-weight:700;box-shadow:0 2px 8px rgba(139,92,246,.4)">✅ ${s.name}</button>`;
+} else {
+return `<button class="category-chip" data-merchant-sub="${s.id}" data-active="false" style="background:#fff;color:#6b7280;border:2px dashed #cbd5e1;font-weight:500">⭕ ${s.name}</button>`;
+}
+}).join('')}
+</div>
+<p style="font-size:12px;color:#6b7280;margin-top:10px;text-align:center">💡 اضغط على أي تصنيف لتفعيله أو إلغاء تفعيله</p>
+`;
+
+container.querySelectorAll('.category-chip').forEach(btn => {
+btn.addEventListener('click', function(){
+const subId = this.dataset.merchantSub;
+const sub = subs.find(x => x.id === subId);
+const isActive = this.dataset.active === 'true';
+
+if(isActive){
+this.dataset.active = 'false';
+this.style.background = '#fff';
+this.style.color = '#6b7280';
+this.style.border = '2px dashed #cbd5e1';
+this.style.fontWeight = '500';
+this.style.boxShadow = 'none';
+this.innerHTML = '⭕ ' + sub.name;
+} else {
+this.dataset.active = 'true';
+this.style.background = '#8b5cf6';
+this.style.color = '#fff';
+this.style.border = '2px solid #6d28d9';
+this.style.fontWeight = '700';
+this.style.boxShadow = '0 2px 8px rgba(139,92,246,.4)';
+this.innerHTML = '✅ ' + sub.name;
+}
+
+const count = container.querySelectorAll('.category-chip[data-active="true"]').length;
+const counter = document.getElementById('subCatCounter');
+if(counter) counter.innerText = `📊 اخترت ${count} من ${subs.length} تصنيف`;
+});
+});
+}
+
+function saveMerchantSubCategories(){
+if(!loggedInMerchant){ alert('❌ سجل دخول كتاجر'); return; }
+
+const container = document.getElementById('merchantSubCategoriesContainer');
+const selected = [];
+container.querySelectorAll('.category-chip[data-active="true"]').forEach(btn => {
+selected.push(btn.dataset.merchantSub);
+});
+
+if(selected.length === 0){
+alert('⚠️ اختار تصنيف فرعي واحد على الأقل');
+return;
+}
+
+const merchant = merchants.find(m => m.bankCode === loggedInMerchant.bankCode);
+if(!merchant){ alert('❌ خطأ'); return; }
+
+merchant.subCategory = selected;
+saveMerchants();
+loggedInMerchant = merchant;
+
+const r = document.getElementById('subCategorySaveResult');
+r.style.color = '#065f46';
+r.style.background = '#d1fae5';
+r.style.padding = '10px';
+r.style.borderRadius = '10px';
+r.innerHTML = `✅ تم حفظ ${selected.length} تصنيف بنجاح`;
+setTimeout(()=>{ r.innerText=''; r.style.background=''; r.style.padding=''; }, 4000);
+
+renderAll();
+}
+
 function filterDealsByRadius(maxR){
 if(!userLat||!userLng){ document.getElementById('dealsList').innerHTML='<div class="no-requests">⏳ يرجى تحديد الموقع</div>'; return; }
-const filtered = merchants.filter(m => { m._dist = calculateDistance(userLat,userLng,m.lat,m.lng); return m._dist <= maxR; });
-filtered.sort((a,b) => (b.cashbackRate || 25) - (a.cashbackRate || 25));
+
+const showAll = currentHomeCategory.includes('all');
+let filtered = merchants.filter(m => {
+m._dist = calculateDistance(userLat,userLng,m.lat,m.lng);
+const inRadius = m._dist <= maxR;
+const inCategory = showAll || currentHomeCategory.includes(m.category);
+const inSubCategory = merchantMatchesSubCategory(m);
+return inRadius && inCategory && inSubCategory;
+});
+
+if(currentSortBy === 'nearest'){
+filtered.sort((a,b) => a._dist - b._dist);
+} else if(currentSortBy === 'cashback'){
+filtered.sort((a,b) => (b.cashbackRate || 0) - (a.cashbackRate || 0));
+} else if(currentSortBy === 'discount'){
+filtered.sort((a,b) => getMaxDiscount(b) - getMaxDiscount(a));
+}
+
 const list = document.getElementById('dealsList');
-if(!filtered.length){ list.innerHTML=`<div class="no-requests">😅 لا توجد محلات ضمن ${maxR} كم</div>`; return; }
+if(!filtered.length){ list.innerHTML=`<div class="no-requests">😅 لا توجد نتائج ضمن ${maxR} كم</div>`; return; }
+
 list.innerHTML = filtered.map(m => {
 const rating = getMerchantRating(m.name);
 const rate = m.cashbackRate || 25;
 const tier = getMerchantTier(rate);
+const maxDisc = getMaxDiscount(m);
+const subNames = getSubCategoryNames(m);
 return `<div class="store-item" onclick="openMerchantModal('${m.bankCode}')">
 <div class="icon">${m.icon}</div>
 <div class="info">
 <h4>${m.name} <span class="tier-chip ${tier.cls}">${tier.name}</span></h4>
-<div class="desc">${m._dist.toFixed(2)} كم • ${m.offers.length} عرض • كاش باك ${rate}%</div>
+<div class="desc">${m._dist.toFixed(2)} كم • ${m.offers.length} عرض • كاش باك ${rate}%${maxDisc ? ' • خصم لحد ' + maxDisc + '%' : ''}</div>
+${subNames ? `<div style="font-size:11px;color:#8b5cf6;margin-top:2px">${subNames}</div>` : ''}
 <div style="font-size:12px;color:#f59e0b">${rating?renderStars(parseFloat(rating))+' '+rating:'⭐ لا توجد تقييمات'}</div>
 </div>
 <div class="badge">${rate}%</div>
@@ -772,8 +1145,9 @@ if(!merchant) return;
 currentModalMerchant = merchant;
 const rate = merchant.cashbackRate || 25;
 const tier = getMerchantTier(rate);
+const subNames = getSubCategoryNames(merchant);
 document.getElementById('modalMerchantName').textContent = merchant.name;
-document.getElementById('modalMerchantInfo').innerHTML = `${merchant.icon} • ${merchant.offers.length} عرض • <span class="tier-chip ${tier.cls}">${tier.name}</span> • كاش باك <strong>${rate}%</strong>`;
+document.getElementById('modalMerchantInfo').innerHTML = `${merchant.icon} • ${merchant.offers.length} عرض • <span class="tier-chip ${tier.cls}">${tier.name}</span> • كاش باك <strong>${rate}%</strong>${subNames ? '<br>🏷️ ' + subNames : ''}`;
 document.getElementById('modalOffersList').innerHTML = merchant.offers.map((o,i) => `
 <div class="offer-item">
 <div class="offer-text"><h5>${o.title}</h5><p>عرض ${i+1} من ${merchant.offers.length}</p></div>
@@ -791,8 +1165,8 @@ function initPickerMap(){
 const mapContainer = document.getElementById('pickerMap');
 if(!mapContainer) return;
 if(mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0){ setTimeout(initPickerMap, 200); return; }
-const targetLat = (loggedInMerchant ? loggedInMerchant.lat : userLat) || 30.788;
-const targetLng = (loggedInMerchant ? loggedInMerchant.lng : userLng) || 31.001;
+const targetLat = (loggedInMerchant ? loggedInMerchant.lat : userLat) || 31.04;
+const targetLng = (loggedInMerchant ? loggedInMerchant.lng : userLng) || 31.38;
 if(pickerMap){ pickerMap.remove(); pickerMap = null; pickerMarker = null; }
 pickerMap = L.map('pickerMap', { center: [targetLat, targetLng], zoom: 15 });
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -808,18 +1182,18 @@ setTimeout(()=>{ if(pickerMap) pickerMap.invalidateSize(); }, 1200);
 function searchAddress(){
 const q = document.getElementById('addressSearch').value.trim();
 const resultEl = document.getElementById('searchResult');
-if(!q){ resultEl.style.color='red'; resultEl.innerText='❌ اكتب عنوان للبحث'; return; }
+if(!q){ resultEl.style.color='red'; resultEl.innerText='❌ اكتب عنوان'; return; }
 resultEl.style.color = '#6b7280'; resultEl.innerText = '⏳ جاري البحث...';
 fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`)
 .then(r => r.json())
 .then(data => {
-if(!data || !data.length){ resultEl.style.color='red'; resultEl.innerText = '❌ لم يتم العثور على العنوان'; return; }
+if(!data || !data.length){ resultEl.style.color='red'; resultEl.innerText = '❌ لم يتم العثور'; return; }
 const lat = parseFloat(data[0].lat); const lng = parseFloat(data[0].lon);
 if(pickerMap){ pickerMap.setView([lat, lng], 16); pickerMarker.setLatLng([lat, lng]); }
 resultEl.style.color = 'green';
-resultEl.innerText = `✅ تم العثور: ${data[0].display_name.substring(0, 60)}...`;
+resultEl.innerText = `✅ تم العثور`;
 })
-.catch(err => { resultEl.style.color='red'; resultEl.innerText = '❌ فشل البحث.'; });
+.catch(err => { resultEl.style.color='red'; resultEl.innerText = '❌ فشل البحث'; });
 }
 
 function savePickedLocation(){
@@ -844,6 +1218,27 @@ setTimeout(()=>{ r.innerText=''; }, 3000);
 
 function handleFileUpload(e){ if(e.target.files[0]){ uploadedFileName = e.target.files[0].name; document.getElementById('fileName').innerText='📎 '+uploadedFileName; } }
 
+function handleRequestImageUpload(e){
+const file = e.target.files[0];
+if(!file) return;
+uploadedRequestImage = file.name;
+document.getElementById('requestFileName').innerText = '📎 ' + file.name;
+const reader = new FileReader();
+reader.onload = function(ev){
+uploadedRequestImageBase64 = ev.target.result;
+const preview = document.getElementById('requestImagePreview');
+preview.src = ev.target.result;
+preview.style.display = 'block';
+};
+reader.readAsDataURL(file);
+}
+
+function toggleBankCodeVisibility(){
+const input = document.getElementById('loginBankCode');
+if(!input) return;
+input.type = input.type === 'password' ? 'text' : 'password';
+}
+
 function submitInvoice(){
 const number = document.getElementById('invoiceNumber').value.trim();
 const customerPhone = document.getElementById('customerPhone').value.trim();
@@ -852,7 +1247,6 @@ const bankCode = getRealValue('bankCode');
 const result = document.getElementById('invoiceResult');
 
 if(!number||isNaN(amount)||amount<=0||!bankCode){ result.className='error'; result.innerText='❌ املأ رقم الفاتورة، المبلغ، والبنكود'; return; }
-if(!uploadedFileName){ result.className='error'; result.innerText='❌ ارفع صورة الفاتورة'; return; }
 const m = merchants.find(x => x.bankCode === bankCode);
 if(!m){ result.className='error'; result.innerText='❌ بنكود غير صحيح'; return; }
 if(adminData.frozenTraders.includes(bankCode)){ result.className='error'; result.innerText='❌ هذا التاجر موقوف مؤقتاً'; return; }
@@ -866,7 +1260,8 @@ const now = new Date();
 invoiceHistory.push({
 number, merchant: merchantName, merchantBankCode: bankCode, customerPhone,
 amount, cashback: cashback.toFixed(2), cashbackRate: rate,
-file: uploadedFileName, bankCode,
+file: uploadedFileName || 'بدون صورة',
+bankCode,
 date: now.toISOString(), day: now.toLocaleDateString('ar-EG',{weekday:'long'}), hour: now.getHours(),
 status: 'active'
 });
@@ -876,7 +1271,7 @@ saveInvoices();
 addCashbackToWallet(customerPhone, bankCode, cashback);
 
 result.className = 'success';
-result.innerText = `✅ تم الرفع! كاش باك ${cashback.toFixed(2)} ج (${rate}%) للعميل ${customerPhone}`;
+result.innerText = `✅ تم الرفع! كاش باك ${cashback.toFixed(2)} ج (${rate}%)`;
 
 lastRatedMerchant = merchantName;
 document.getElementById('ratedMerchantName').innerText = merchantName;
@@ -903,11 +1298,11 @@ const phone = document.getElementById('redeemPhone').value.trim();
 const bankCode = getRealValue('redeemBankCode');
 const resultEl = document.getElementById('balanceResult');
 
-if (!phone || !bankCode) { resultEl.innerHTML = '<p style="color:#ef4444">❌ املأ رقم الهاتف والبنكود</p>'; return; }
+if (!phone || !bankCode) { resultEl.innerHTML = '<p style="color:#ef4444">❌ املأ البيانات</p>'; return; }
 const wallet = customerWallets[phone] ? customerWallets[phone][bankCode] : null;
 
 if (!wallet || wallet.balance <= 0) {
-resultEl.innerHTML = `<div style="background:#fef3c7;padding:14px;border-radius:10px"><p style="color:#92400e;font-weight:600">⚠️ لا يوجد رصيد لهذا العميل عند هذا التاجر</p></div>`;
+resultEl.innerHTML = `<div style="background:#fef3c7;padding:14px;border-radius:10px"><p style="color:#92400e;font-weight:600">⚠️ لا يوجد رصيد</p></div>`;
 return;
 }
 
@@ -916,9 +1311,8 @@ const merchantName = merchant ? merchant.name : bankCode;
 
 resultEl.innerHTML = `
 <div style="background:#d1fae5;padding:14px;border-radius:10px;margin-bottom:10px">
-<p style="font-size:16px;color:#065f46;font-weight:700">💰 رصيد العميل: ${wallet.balance.toFixed(2)} جنيه</p>
+<p style="font-size:16px;color:#065f46;font-weight:700">💰 رصيد العميل: ${wallet.balance.toFixed(2)} ج</p>
 <p style="font-size:13px;color:#065f46">🏪 ${merchantName}</p>
-<p style="font-size:12px;color:#6b7280;margin-top:4px">كسب: ${wallet.earned.toFixed(2)} ج | صرف: ${wallet.spent.toFixed(2)} ج</p>
 </div>
 <input type="number" id="newInvoiceAmount" placeholder="💰 مبلغ الفاتورة الجديدة">
 <input type="number" id="useAmount" placeholder="💵 المبلغ المراد استخدامه" max="${wallet.balance}">
@@ -953,7 +1347,7 @@ saveRedemptions();
 
 const paid = newAmount - useAmount;
 resultEl.style.color = '#10b981';
-resultEl.innerHTML = `✅ تم الخصم!<br>💰 الفاتورة: ${newAmount} ج<br>💵 الخصم: ${useAmount} ج<br>🎉 المطلوب: <strong>${paid} ج</strong><br>📊 المتبقي: ${wallet.balance.toFixed(2)} ج`;
+resultEl.innerHTML = `✅ تم الخصم!<br>💰 الفاتورة: ${newAmount} ج<br>💵 الخصم: ${useAmount} ج<br>🎉 المطلوب: <strong>${paid} ج</strong>`;
 
 renderAll(); updateAccount();
 if (loggedInMerchant) renderMerchantData();
@@ -982,7 +1376,7 @@ renderAll();
 function renderInvoiceHistory(){
 const c = document.getElementById('invoiceHistory');
 if(!invoiceHistory.length){ c.innerHTML='<p style="color:#6b7280">لا توجد فواتير</p>'; return; }
-c.innerHTML = invoiceHistory.map(inv => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;flex-wrap:wrap;gap:4px"><span>📄 ${inv.number}</span><span>${inv.merchant}</span><span>${inv.amount} ج</span><span style="color:#10b981">كاش ${inv.cashback} ${inv.cashbackRate?`(${inv.cashbackRate}%)`:''}</span><span style="font-size:12px;color:#6b7280">📱 ${inv.customerPhone||'-'}</span></div>`).join('');
+c.innerHTML = invoiceHistory.map(inv => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;flex-wrap:wrap;gap:4px"><span>📄 ${inv.number}</span><span>${inv.merchant}</span><span>${inv.amount} ج</span><span style="color:#10b981">كاش ${inv.cashback}</span><span style="font-size:12px;color:#6b7280">📱 ${inv.customerPhone||'-'}</span></div>`).join('');
 }
 
 function renderMerchantBalances(){
@@ -1011,28 +1405,55 @@ return `<div class="balance-card">
 <span style="color:#ef4444;font-size:13px">مصروف: ${data.spent.toFixed(2)} ج</span>
 </div>
 <div style="margin-top:6px;background:#d1fae5;padding:6px 12px;border-radius:8px;text-align:center">
-<strong style="color:#065f46">💵 الرصيد المتبقي: ${remaining} ج</strong>
+<strong style="color:#065f46">💵 المتبقي: ${remaining} ج</strong>
 </div>
 </div>`;
 }).join('');
 }
 
 function generateShopResponses(cat){
-const shops = { fashion:['Fashion Hub','Zara Men'], restaurants:['Pizza House','Sushi House'], bigfood:['Burger King','Big Meal'], electronics:['Tech Zone','CompuWorld'], car_parts:['قطع غيار الأهرام','التوكيل'], car_accessories:['كماليات السيارات','إكسسوارات'], car_repair:['ورشة الصيانة','مركز الخدمة'], clinics:['عيادة د. سمير','مركز الأسنان'], labs:['معمل المختبر','تحاليل دقيقة'], radiology:['مركز مصر للأشعة','أشعة متقدمة'], hospitals:['مستشفى النيل','المستشفى الدولي'] };
+const shops = { fashion:['Fashion Hub','Zara Men'], restaurants:['Pizza House','Sushi House'], bigfood:['Burger King','Big Meal'], electronics:['Tech Zone','CompuWorld'], car_parts:['قطع غيار المنصورة','التوكيل'], car_accessories:['كماليات السيارات','إكسسوارات'], car_repair:['ورشة الصيانة','مركز الخدمة'], clinics:['عيادة د. سمير','مركز الأسنان'], labs:['معمل المختبر','تحاليل دقيقة'], radiology:['مركز مصر للأشعة','أشعة متقدمة'], hospitals:['مستشفى النيل','المستشفى الدولي'] };
 const list = shops[cat] || ['Shop 1','Shop 2'];
-return list.map(s => { const md = merchants.find(m => m.name===s); return { shop:s, price:(Math.random()*500+50).toFixed(0), message:'متوفر بسعر ممتاز', lat: md?md.lat:30.78, lng: md?md.lng:31.00 }; });
+return list.map((s, idx) => {
+const md = merchants.find(m => m.name===s);
+const hasImage = Math.random() > 0.3;
+const imageUrl = hasImage ? `https://picsum.photos/seed/${s.replace(/\s/g,'')}${Date.now()}${idx}/300/300` : '';
+return {
+shop: s,
+price:(Math.random()*500+50).toFixed(0),
+message: hasImage ? 'متوفر، وده شكل المنتج' : 'متوفر بسعر ممتاز',
+image: imageUrl,
+customerMessages: [],
+merchantReply: '',
+lat: md?md.lat:31.04,
+lng: md?md.lng:31.38
+};
+});
 }
 
 function sendSpecialRequest(){
 const cat = document.getElementById('requestCategory').value;
 const product = document.getElementById('requestProduct').value.trim();
 if(!product){ alert('❌ اكتب المنتج'); return; }
-const req = { id:requestIdCounter++, category:cat, product, details:document.getElementById('requestDetails').value||'لا تفاصيل', status:'pending', responses:[], createdAt:new Date().toLocaleString() };
+const req = {
+id: requestIdCounter++,
+category: cat,
+product,
+details: document.getElementById('requestDetails').value || 'لا تفاصيل',
+status: 'pending',
+responses: [],
+createdAt: new Date().toLocaleString(),
+image: uploadedRequestImageBase64
+};
 setTimeout(()=>{ req.responses = generateShopResponses(cat); req.status='responded'; renderRequests(); }, 800);
 specialRequests.unshift(req);
 renderRequests();
 document.getElementById('requestProduct').value='';
 document.getElementById('requestDetails').value='';
+document.getElementById('requestFileName').innerText='لم يتم اختيار ملف';
+document.getElementById('requestImagePreview').style.display='none';
+uploadedRequestImage = '';
+uploadedRequestImageBase64 = '';
 alert('✅ تم الإرسال');
 }
 
@@ -1040,10 +1461,129 @@ function renderRequests(){
 const c = document.getElementById('myRequests');
 if(!specialRequests.length){ c.innerHTML='<div class="no-requests">لا توجد طلبات</div>'; return; }
 c.innerHTML = specialRequests.map(req => {
-let resp = req.responses.map(r => `<div class="response-item"><span class="response-shop">🏪 ${r.shop}</span> <span class="response-price">💰 ${r.price} ج</span><div style="font-size:13px;color:#4b5563;margin-top:2px">${r.message}</div><button class="location-btn" onclick="window.open('https://www.google.com/maps?q=${r.lat},${r.lng}','_blank')">📍 عرض الموقع</button><button class="accept-btn" onclick="alert('✅ تم القبول')">قبول</button></div>`).join('');
-if(req.status==='pending') resp='<div style="color:#92400e">⏳ جاري الرد...</div>';
-return `<div class="request-card"><div style="display:flex;justify-content:space-between;align-items:center"><h4>📦 ${req.product}</h4><span class="status ${req.status}">${req.status==='pending'?'⏳ جاري':'✅ تم الرد'}</span></div><div style="color:#4b5563;font-size:14px;margin:6px 0">${req.details}</div><div style="font-size:12px;color:#6b7280">🕒 ${req.createdAt}</div>${resp}</div>`;
+let resp = req.responses.map((r, idx) => {
+let threadHtml = '';
+if(r.customerMessages && r.customerMessages.length){
+threadHtml = r.customerMessages.map(m => 
+`<div style="background:#dbeafe;padding:6px 10px;border-radius:8px;margin:4px 0;font-size:12px">
+<strong>👤 أنت:</strong> ${m.text}
+</div>`).join('');
+}
+if(r.merchantReply){
+threadHtml += `<div style="background:#fef3c7;padding:6px 10px;border-radius:8px;margin:4px 0;font-size:12px">
+<strong>🏪 ${r.shop}:</strong> ${r.merchantReply}
+</div>`;
+}
+const imageHtml = r.image 
+? `<img src="${r.image}" style="width:100%;max-width:150px;border-radius:10px;margin:6px 0;border:2px solid #eee;" onerror="this.style.display='none'">`
+: '';
+return `<div class="response-item">
+<span class="response-shop">🏪 ${r.shop}</span> 
+<span class="response-price">💰 ${r.price} ج</span>
+${imageHtml}
+<div style="font-size:13px;color:#4b5563;margin-top:2px">${r.message}</div>
+<div style="margin-top:4px">
+<button class="location-btn" onclick="window.open('https://www.google.com/maps?q=${r.lat},${r.lng}','_blank')">📍</button>
+<button class="accept-btn" onclick="alert('✅ تم القبول')">قبول</button>
+<button class="admin-btn primary" onclick="askMerchantForImage(${req.id}, ${idx})">📸 اسأل عن صورة</button>
+</div>
+${threadHtml}
+</div>`;
 }).join('');
+
+if(req.status==='pending') resp='<div style="color:#92400e">⏳ جاري الرد...</div>';
+
+const custImageHtml = req.image 
+? `<img src="${req.image}" style="width:100%;max-width:200px;border-radius:10px;margin:6px 0;border:2px solid #ddd;">`
+: '';
+
+return `<div class="request-card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<h4>📦 ${req.product}</h4>
+<span class="status ${req.status}">${req.status==='pending'?'⏳ جاري':'✅ تم الرد'}</span>
+</div>
+${custImageHtml}
+<div style="color:#4b5563;font-size:14px;margin:6px 0">${req.details}</div>
+<div style="font-size:12px;color:#6b7280">🕒 ${req.createdAt}</div>
+${resp}
+</div>`;
+}).join('');
+}
+
+function askMerchantForImage(requestId, responseIndex){
+const req = specialRequests.find(r => r.id === requestId);
+if(!req) return;
+const resp = req.responses[responseIndex];
+if(!resp) return;
+
+const msg = prompt('اكتب رسالتك للتاجر:');
+if(!msg) return;
+
+if(!resp.customerMessages) resp.customerMessages = [];
+resp.customerMessages.push({ text: msg, date: new Date().toLocaleString() });
+renderRequests();
+
+setTimeout(() => {
+resp.image = `https://picsum.photos/seed/${Math.random()}/300/300`;
+resp.merchantReply = 'أهلاً بك، دي صورة إضافية';
+renderRequests();
+}, 2000);
+}
+
+function updateCustomerBalanceBanner(){
+const banner = document.getElementById('myBalanceBanner');
+if(!banner) return;
+const phone = document.getElementById('accPhone').innerText;
+if(!phone || phone === '-' || !customerWallets[phone]){
+banner.style.display = 'none';
+return;
+}
+const wallets = customerWallets[phone];
+let total = 0;
+let shopsCount = 0;
+Object.keys(wallets).forEach(bankCode => {
+const w = wallets[bankCode];
+if(w.balance > 0){ total += w.balance; shopsCount++; }
+});
+if(total > 0 || shopsCount > 0){
+banner.style.display = 'block';
+document.getElementById('totalBalanceValue').innerText = total.toFixed(2) + ' ج';
+document.getElementById('balanceShopsCount').innerText = shopsCount;
+} else {
+banner.style.display = 'none';
+}
+}
+
+function renderCustomerWalletsBreakdown(){
+const card = document.getElementById('myWalletsCard');
+const container = document.getElementById('customerWalletsBreakdown');
+if(!card || !container) return;
+const phone = document.getElementById('accPhone').innerText;
+if(!phone || phone === '-' || !customerWallets[phone]){
+card.style.display = 'none';
+return;
+}
+const wallets = customerWallets[phone];
+const entries = Object.keys(wallets).map(bankCode => {
+const w = wallets[bankCode];
+const m = merchants.find(x => x.bankCode === bankCode);
+return {
+shopName: m ? m.name : bankCode,
+icon: m ? m.icon : '🏪',
+balance: w.balance,
+earned: w.earned,
+spent: w.spent
+};
+}).filter(e => e.balance > 0 || e.earned > 0);
+if(!entries.length){ card.style.display = 'none'; return; }
+card.style.display = 'block';
+container.innerHTML = entries.map(e => `
+<div class="merchant-customer-card" style="border-right-color:#10b981">
+<div style="font-weight:600">${e.icon} ${e.shopName}</div>
+<div style="font-size:13px;color:#10b981;font-weight:600;margin-top:4px">💰 الرصيد: ${e.balance.toFixed(2)} ج</div>
+<div style="font-size:12px;color:#6b7280;margin-top:2px">كسب: ${e.earned.toFixed(2)} | صرف: ${e.spent.toFixed(2)}</div>
+</div>
+`).join('');
 }
 
 function renderMerchantData(){
@@ -1055,8 +1595,18 @@ myInvoices.forEach(inv => { customers[inv.number]=true; sales+=parseFloat(inv.am
 const myOffers = loggedInMerchant.offers || [];
 document.getElementById('dashCust').innerText = Object.keys(customers).length || myInvoices.length;
 document.getElementById('dashSales').innerText = sales.toFixed(2)+' ج';
-document.getElementById('dashCashback').innerText = cash.toFixed(2)+' ج';
 document.getElementById('dashOffers').innerText = myOffers.length;
+
+const myRedemptions = redemptionHistory.filter(r => r.bankCode === loggedInMerchant.bankCode);
+const totalCashbackGiven = myInvoices.reduce((s,i) => s + parseFloat(i.cashback), 0);
+const totalCashbackSpent = myRedemptions.reduce((s,r) => s + parseFloat(r.usedCashback), 0);
+const cashbackRemaining = totalCashbackGiven - totalCashbackSpent;
+const netSales = sales - totalCashbackSpent;
+
+document.getElementById('dashCashbackGiven').innerText = totalCashbackGiven.toFixed(2) + ' ج';
+document.getElementById('dashCashbackSpent').innerText = totalCashbackSpent.toFixed(2) + ' ج';
+document.getElementById('dashCashbackRemaining').innerText = cashbackRemaining.toFixed(2) + ' ج';
+document.getElementById('dashNetSales').innerText = netSales.toFixed(2) + ' ج';
 
 const currentRate = loggedInMerchant.cashbackRate || 15;
 document.getElementById('rateSlider').value = currentRate;
@@ -1078,8 +1628,8 @@ else ic.innerHTML = myInvoices.map(inv => `
 <div style="font-size:13px;color:#6b7280">💰 ${inv.amount} ج | 💵 ${inv.cashback} ج | 📱 ${inv.customerPhone||'-'}</div>
 <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
 ${inv.status === 'active' ? 
-`<button class="admin-btn primary" onclick="editInvoiceAmount('${inv.number}')">✏️ تعديل المبلغ</button>
- <button class="admin-btn danger" onclick="promptReturn('${inv.number}')">🔄 تسجيل مرتجع</button>` 
+`<button class="admin-btn primary" onclick="editInvoiceAmount('${inv.number}')">✏️ تعديل</button>
+<button class="admin-btn danger" onclick="promptReturn('${inv.number}')">🔄 مرتجع</button>` 
 : `<span style="color:#ef4444;font-size:12px;">❌ مرتجع (${inv.returnAmount || 0} ج)</span>`
 }
 </div>
@@ -1096,15 +1646,16 @@ if(w.balance > 0 || w.earned > 0){ myWallets.push({ phone, ...w }); }
 }
 });
 if(!myWallets.length) wc.innerHTML='<p style="color:#6b7280">لا يوجد أرصدة</p>';
-else wc.innerHTML = myWallets.map(w => `<div class="merchant-customer-card">📱 ${w.phone}<br><span style="font-size:13px;color:#10b981;font-weight:600">💰 الرصيد: ${w.balance.toFixed(2)} ج</span><span style="font-size:12px;color:#6b7280"> | كسب: ${w.earned.toFixed(2)} | صرف: ${w.spent.toFixed(2)}</span></div>`).join('');
+else wc.innerHTML = myWallets.map(w => `<div class="merchant-customer-card">📱 ${w.phone}<br><span style="font-size:13px;color:#10b981;font-weight:600">💰 ${w.balance.toFixed(2)} ج</span><span style="font-size:12px;color:#6b7280"> | كسب: ${w.earned.toFixed(2)} | صرف: ${w.spent.toFixed(2)}</span></div>`).join('');
+
+renderMerchantSubCategories();
 }
 
 function updateRateDisplay(val) {
 const v = parseInt(val);
 document.getElementById('rateValueDisplay').innerText = v;
 const tier = getMerchantTier(v);
-const tierEl = document.getElementById('rateTierDisplay');
-tierEl.innerHTML = `${tier.name} <span style="font-size:12px;color:#6b7280">(كاش باك ${v}%)</span>`;
+document.getElementById('rateTierDisplay').innerHTML = `${tier.name} <span style="font-size:12px;color:#6b7280">(${v}%)</span>`;
 }
 
 function saveCashbackRate() {
@@ -1123,85 +1674,63 @@ setTimeout(()=>{ r.innerText=''; }, 3000);
 renderAll(); renderMerchantData();
 }
 
-// ========== دالة تعديل مبلغ الفاتورة ==========
 function editInvoiceAmount(invoiceNumber) {
-    if (!loggedInMerchant) { alert('❌ سجل دخول كتاجر'); return; }
-    const inv = invoiceHistory.find(i => i.number === invoiceNumber);
-    if (!inv || inv.status !== 'active') { alert('❌ الفاتورة غير موجودة أو مرتجعة'); return; }
-    
-    const newAmountStr = prompt(`المبلغ الحالي: ${inv.amount} ج\nاكتب المبلغ الجديد (لازم يكون أقل من أو يساوي ${inv.amount}):`);
-    if (newAmountStr === null) return;
-    
-    const newAmount = parseFloat(newAmountStr);
-    if (isNaN(newAmount) || newAmount <= 0) { alert('❌ مبلغ غير صحيح'); return; }
-    if (newAmount > parseFloat(inv.amount)) { alert('❌ المبلغ الجديد ما ينفعش يكون أكبر من الأصلي. لو عايز تزود، ده مش مرتجع.'); return; }
-    
-    const oldCashback = parseFloat(inv.cashback);
-    const newCashback = newAmount * (inv.cashbackRate / 100);
-    const cashbackDiff = oldCashback - newCashback;
-    
-    // خصم الفرق من محفظة العميل
-    const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
-    if (wallet && cashbackDiff > 0) {
-        wallet.balance -= cashbackDiff;
-        wallet.earned -= cashbackDiff;
-        saveWallets();
-    }
-    
-    inv.originalAmount = inv.originalAmount || inv.amount;
-    inv.amount = newAmount;
-    inv.cashback = newCashback.toFixed(2);
-    inv.editedAt = new Date().toISOString();
-    
-    saveInvoices();
-    renderAll();
-    if (loggedInMerchant) renderMerchantData();
-    
-    alert(`✅ تم تعديل الفاتورة.\n💰 المبلغ الجديد: ${newAmount} ج\n💵 الكاش باك الجديد: ${newCashback.toFixed(2)} ج\n📊 تم خصم ${cashbackDiff.toFixed(2)} ج من محفظة العميل.`);
+if (!loggedInMerchant) { alert('❌ سجل دخول كتاجر'); return; }
+const inv = invoiceHistory.find(i => i.number === invoiceNumber);
+if (!inv || inv.status !== 'active') { alert('❌ الفاتورة غير موجودة'); return; }
+const newAmountStr = prompt(`المبلغ الحالي: ${inv.amount} ج\nاكتب المبلغ الجديد:`);
+if (newAmountStr === null) return;
+const newAmount = parseFloat(newAmountStr);
+if (isNaN(newAmount) || newAmount <= 0) { alert('❌ مبلغ غير صحيح'); return; }
+if (newAmount > parseFloat(inv.amount)) { alert('❌ لا يمكن الزيادة'); return; }
+const oldCashback = parseFloat(inv.cashback);
+const newCashback = newAmount * (inv.cashbackRate / 100);
+const cashbackDiff = oldCashback - newCashback;
+const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
+if (wallet && cashbackDiff > 0) { wallet.balance -= cashbackDiff; wallet.earned -= cashbackDiff; saveWallets(); }
+inv.amount = newAmount;
+inv.cashback = newCashback.toFixed(2);
+inv.editedAt = new Date().toISOString();
+saveInvoices(); renderAll();
+if (loggedInMerchant) renderMerchantData();
+alert(`✅ تم التعديل: ${newAmount} ج`);
 }
 
-// ========== دالة المرتجع ==========
 function processReturn(invoiceNumber, returnAmount) {
-    const inv = invoiceHistory.find(i => i.number === invoiceNumber);
-    if (!inv || inv.status !== 'active') { alert('❌ الفاتورة غير موجودة أو تم إرجاعها بالفعل'); return; }
-    const cashbackToReverse = returnAmount * (inv.cashbackRate / 100);
-    const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
-    if (wallet) {
-        wallet.balance -= cashbackToReverse;
-        wallet.earned -= cashbackToReverse;
-        if (wallet.balance < 0) { console.log(`⚠️ العميل ${inv.customerPhone} عليه مديونية ${Math.abs(wallet.balance)} ج`); }
-        saveWallets();
-    }
-    inv.status = returnAmount >= inv.amount ? 'returned' : 'partial_return';
-    inv.returnAmount = returnAmount;
-    inv.returnedCashback = cashbackToReverse;
-    inv.returnDate = new Date().toISOString();
-    saveInvoices();
-    renderAll();
-    alert(`✅ تم تسجيل المرتجع. تم خصم ${cashbackToReverse.toFixed(2)} ج من محفظة العميل.`);
+const inv = invoiceHistory.find(i => i.number === invoiceNumber);
+if (!inv || inv.status !== 'active') { alert('❌ الفاتورة غير موجودة'); return; }
+const cashbackToReverse = returnAmount * (inv.cashbackRate / 100);
+const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
+if (wallet) { wallet.balance -= cashbackToReverse; wallet.earned -= cashbackToReverse; saveWallets(); }
+inv.status = returnAmount >= inv.amount ? 'returned' : 'partial_return';
+inv.returnAmount = returnAmount;
+inv.returnedCashback = cashbackToReverse;
+inv.returnDate = new Date().toISOString();
+saveInvoices(); renderAll();
+alert(`✅ تم المرتجع. خصم ${cashbackToReverse.toFixed(2)} ج`);
 }
 
 function promptReturn(invoiceNumber) {
-    const amount = prompt("اكتب المبلغ المرتجع (أو اكتب 'الكل' للإرجاع الكامل):");
-    if (amount === null) return;
-    const inv = invoiceHistory.find(i => i.number === invoiceNumber);
-    if (!inv) return;
-    let returnAmount = amount === 'الكل' || amount === 'كله' ? inv.amount : parseFloat(amount);
-    if (isNaN(returnAmount) || returnAmount <= 0) { alert('❌ مبلغ غير صحيح'); return; }
-    if (returnAmount > inv.amount) { alert('❌ المبلغ المرتجع أكبر من قيمة الفاتورة'); return; }
-    processReturn(invoiceNumber, returnAmount);
+const amount = prompt("المبلغ المرتجع (أو 'الكل'):");
+if (amount === null) return;
+const inv = invoiceHistory.find(i => i.number === invoiceNumber);
+if (!inv) return;
+let returnAmount = amount === 'الكل' || amount === 'كله' ? inv.amount : parseFloat(amount);
+if (isNaN(returnAmount) || returnAmount <= 0) { alert('❌ مبلغ غير صحيح'); return; }
+if (returnAmount > inv.amount) { alert('❌ أكبر من الفاتورة'); return; }
+processReturn(invoiceNumber, returnAmount);
 }
 
 function showReport(period) {
 currentReportPeriod = period;
 document.querySelectorAll('.report-period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === period));
-if (!loggedInMerchant) { document.getElementById('reportDetails').innerHTML = '<p style="color:#ef4444">يجب تسجيل الدخول كتاجر</p>'; return; }
+if (!loggedInMerchant) { document.getElementById('reportDetails').innerHTML = '<p style="color:#ef4444">سجل دخول كتاجر</p>'; return; }
 const now = new Date();
 let startDate, periodLabel;
-if (period === 'daily') { startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()); periodLabel = `📅 النهاردة - ${now.toLocaleDateString('ar-EG')}`; }
+if (period === 'daily') { startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()); periodLabel = `📅 النهاردة`; }
 else if (period === 'weekly') { startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); periodLabel = `📅 آخر 7 أيام`; }
-else if (period === 'monthly') { startDate = new Date(now.getFullYear(), now.getMonth(), 1); periodLabel = `📅 ${now.toLocaleDateString('ar-EG', {month:'long', year:'numeric'})}`; }
-else { startDate = new Date(0); periodLabel = '📅 كل الفواتير'; }
+else if (period === 'monthly') { startDate = new Date(now.getFullYear(), now.getMonth(), 1); periodLabel = `📅 الشهر`; }
+else { startDate = new Date(0); periodLabel = '📅 الكل'; }
 document.getElementById('reportPeriodLabel').innerText = periodLabel;
 
 const myInvoices = invoiceHistory.filter(inv => {
@@ -1215,15 +1744,14 @@ const isMine = r.bankCode === loggedInMerchant.bankCode;
 return isMine && rDate >= startDate;
 });
 
-// حساب الإجماليات مع استبعاد المرتجعات
 let totalSales = 0, totalCashbackGiven = 0;
 myInvoices.forEach(inv => {
-    const amt = parseFloat(inv.amount);
-    const cb = parseFloat(inv.cashback);
-    const retAmt = inv.returnAmount || 0;
-    const retCb = inv.returnedCashback || 0;
-    totalSales += (amt - retAmt);
-    totalCashbackGiven += (cb - retCb);
+const amt = parseFloat(inv.amount);
+const cb = parseFloat(inv.cashback);
+const retAmt = inv.returnAmount || 0;
+const retCb = inv.returnedCashback || 0;
+totalSales += (amt - retAmt);
+totalCashbackGiven += (cb - retCb);
 });
 
 const totalInvoices = myInvoices.length;
@@ -1248,16 +1776,16 @@ document.getElementById('reportDetails').innerHTML = `
 <div class="report-detail-box"><span class="lbl">👥 عملاء فريدين</span><span class="val">${uniqueCustomers}</span></div>
 <div class="report-detail-box"><span class="lbl">💰 متوسط الفاتورة</span><span class="val">${avgInvoice} ج</span></div>
 <div class="report-detail-box"><span class="lbl">🏆 أفضل يوم</span><span class="val">${topDay}</span></div>
-<div class="report-detail-box" style="background:#d1fae5"><span class="lbl" style="color:#065f46">💵 الرصيد المتبقي</span><span class="val" style="color:#065f46">${remainingBalance.toFixed(2)} ج</span></div>
+<div class="report-detail-box" style="background:#d1fae5"><span class="lbl" style="color:#065f46">💵 المتبقي</span><span class="val" style="color:#065f46">${remainingBalance.toFixed(2)} ج</span></div>
 </div>
 </div>
 `;
 }
 
 function exportReportPDF() {
-if (!loggedInMerchant) { alert('سجل دخول كتاجر أولاً'); return; }
+if (!loggedInMerchant) { alert('سجل دخول كتاجر'); return; }
 const element = document.getElementById('reportContent');
-const opt = { margin: 10, filename: `PAMIGO-Report-${currentReportPeriod}-${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+const opt = { margin: 10, filename: `PAMIGO-Report-${Date.now()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
 html2pdf().set(opt).from(element).save();
 }
 
@@ -1312,7 +1840,6 @@ const merchant = merchants.find(m => m.bankCode === loggedInMerchant?.bankCode);
 if(merchant){ merchant.offers = merchant.offers.filter(o => o.id !== id); saveMerchants(); loggedInMerchant = merchant; }
 renderAll(); renderMerchantData();
 }
-
 // ============================================================
 // دوال الأدمن
 // ============================================================
@@ -1355,20 +1882,49 @@ c.innerHTML = merchants.map(m => {
 const isFrozen = adminData.frozenTraders.includes(m.bankCode);
 const rate = m.cashbackRate || 15;
 const tier = getMerchantTier(rate);
+const subNames = getSubCategoryNames(m);
 return `<div class="admin-item">
 <div class="head">
 <span class="title">${m.icon} ${m.name}</span>
 ${isFrozen ? '<span class="frozen-badge">❄️ موقوف</span>' : '<span class="active-badge">✅ نشط</span>'}
 </div>
 <div class="info">🔑 ${m.bankCode} | 📱 ${m.phone} | 💰 ${rate}% <span class="tier-chip ${tier.cls}">${tier.name}</span></div>
+<div class="info">📂 التصنيف: <strong>${m.category}</strong></div>
+<div class="info">🏷️ الفرعية: ${subNames || '<span style="color:#ef4444">غير محدد</span>'}</div>
 <div class="info">🎁 ${m.offers.length} عرض</div>
 <div class="actions">
-<button class="admin-btn ${isFrozen?'success':'warning'}" onclick="toggleFreezeTrader('${m.bankCode}')">${isFrozen?'✅ إلغاء الإيقاف':'❄️ إيقاف مؤقت'}</button>
-<button class="admin-btn primary" onclick="editTraderRate('${m.bankCode}')">💰 تعديل النسبة</button>
+<button class="admin-btn ${isFrozen?'success':'warning'}" onclick="toggleFreezeTrader('${m.bankCode}')">${isFrozen?'✅ إلغاء الإيقاف':'❄️ إيقاف'}</button>
+<button class="admin-btn primary" onclick="editTraderRate('${m.bankCode}')">💰 النسبة</button>
+<button class="admin-btn purple" onclick="adminEditSubCategories('${m.bankCode}')">🏷️ التصنيفات</button>
 <button class="admin-btn danger" onclick="deleteTrader('${m.bankCode}')">🗑️ حذف</button>
 </div>
 </div>`;
 }).join('');
+}
+
+function adminEditSubCategories(bankCode){
+const m = merchants.find(x => x.bankCode === bankCode);
+if(!m) return;
+
+const mainCat = m.category;
+const subs = SUB_CATEGORIES[mainCat] || [];
+if(!subs.length){ alert('التصنيف الرئيسي مفيهوش تصنيفات فرعية'); return; }
+
+const currentSubs = Array.isArray(m.subCategory) ? m.subCategory : (m.subCategory ? [m.subCategory] : []);
+const options = subs.map(s => `${currentSubs.includes(s.id) ? '✅' : '⬜'} ${s.id} - ${s.name}`).join('\n');
+const input = prompt(`التصنيفات الفرعية لـ ${m.name}\nاكتب الأكواد (مفصولة بفاصلة):\n${options}\n\nمثال: men,women`);
+
+if(input === null) return;
+
+const selected = input.split(',').map(s => s.trim()).filter(s => s.length > 0);
+const valid = selected.filter(s => subs.find(x => x.id === s));
+
+if(!valid.length){ alert('❌ ما فيش تصنيف صحيح'); return; }
+
+m.subCategory = valid;
+saveMerchants();
+renderAdminTraders();
+alert(`✅ تم تحديث التصنيفات: ${valid.join(', ')}`);
 }
 
 function toggleFreezeTrader(bankCode) {
@@ -1377,32 +1933,124 @@ if (idx === -1) adminData.frozenTraders.push(bankCode);
 else adminData.frozenTraders.splice(idx, 1);
 saveAdminData();
 renderAdminTraders();
-alert(idx === -1 ? '✅ تم إيقاف التاجر' : '✅ تم إلغاء الإيقاف');
+alert(idx === -1 ? '✅ تم الإيقاف' : '✅ تم إلغاء الإيقاف');
 }
 
 function editTraderRate(bankCode) {
 const m = merchants.find(x => x.bankCode === bankCode);
 if (!m) return;
 const current = m.cashbackRate || 15;
-const newRate = prompt(`النسبة الحالية: ${current}%\nاكتب النسبة الجديدة (1-50):`, current);
+const newRate = prompt(`النسبة الحالية: ${current}%\nالنسبة الجديدة (1-50):`, current);
 if (newRate === null) return;
 const rate = parseInt(newRate);
-if (isNaN(rate) || rate < 1 || rate > 50) { alert('❌ النسبة لازم تكون بين 1 و 50'); return; }
+if (isNaN(rate) || rate < 1 || rate > 50) { alert('❌ لازم بين 1 و 50'); return; }
 m.cashbackRate = rate;
 saveMerchants();
 renderAdminTraders();
-alert(`✅ تم تعديل النسبة إلى ${rate}%`);
+alert(`✅ تم التعديل إلى ${rate}%`);
 }
 
 function deleteTrader(bankCode) {
-if (!confirm('هل أنت متأكد من حذف هذا التاجر نهائياً؟')) return;
+if (!confirm('متأكد من الحذف؟')) return;
 merchants = merchants.filter(m => m.bankCode !== bankCode);
 saveMerchants();
 renderAdminTraders();
 renderAdminDashboard();
-alert('✅ تم حذف التاجر');
+alert('✅ تم الحذف');
 }
 
+function showAddTraderForm(){
+document.getElementById('addTraderForm').style.display = 'block';
+updateNewTraderSubCategories();
+}
+function hideAddTraderForm(){
+document.getElementById('addTraderForm').style.display = 'none';
+}
+
+function updateNewTraderSubCategories(){
+const cat = document.getElementById('newTraderCategory').value;
+const subs = SUB_CATEGORIES[cat] || [];
+const container = document.getElementById('newTraderSubCategories');
+if(!subs.length){ container.innerHTML = ''; return; }
+container.innerHTML = subs.map(s => 
+`<button type="button" class="category-chip" data-new-sub="${s.id}" onclick="this.classList.toggle('active')">${s.name}</button>`
+).join('');
+}
+
+function addNewTrader(){
+const name = document.getElementById('newTraderName').value.trim();
+const bankCode = document.getElementById('newTraderBankCode').value.trim();
+const phone = document.getElementById('newTraderPhone').value.trim();
+const category = document.getElementById('newTraderCategory').value;
+const lat = parseFloat(document.getElementById('newTraderLat').value);
+const lng = parseFloat(document.getElementById('newTraderLng').value);
+const rate = parseInt(document.getElementById('newTraderRate').value);
+
+const resultEl = document.getElementById('addTraderResult');
+
+if(!name || !bankCode || !phone){
+resultEl.style.color = 'red'; resultEl.innerText = '❌ املأ الاسم والبنكود والموبايل';
+return;
+}
+if(merchants.find(m => m.bankCode === bankCode)){
+resultEl.style.color = 'red'; resultEl.innerText = '❌ البنكود مستخدم';
+return;
+}
+if(isNaN(lat) || isNaN(lng)){
+resultEl.style.color = 'red'; resultEl.innerText = '❌ املأ الإحداثيات';
+return;
+}
+if(isNaN(rate) || rate < 1 || rate > 50){
+resultEl.style.color = 'red'; resultEl.innerText = '❌ النسبة لازم بين 1 و 50';
+return;
+}
+
+const subs = [];
+document.querySelectorAll('#newTraderSubCategories .category-chip.active').forEach(btn => {
+subs.push(btn.dataset.newSub);
+});
+
+if(!subs.length){
+resultEl.style.color = 'red'; resultEl.innerText = '❌ اختار تصنيف فرعي واحد على الأقل';
+return;
+}
+
+const iconMap = { fashion:'👗', restaurants:'🍕', bigfood:'🍔', electronics:'📱', car_parts:'🛞', car_accessories:'🪞', car_repair:'🔧', clinics:'🩺', labs:'🧪', radiology:'📡', hospitals:'🏨' };
+
+const newTrader = {
+bankCode: bankCode,
+name: name,
+phone: phone,
+category: category,
+subCategory: subs,
+icon: iconMap[category] || '🏪',
+lat: lat,
+lng: lng,
+cashbackRate: rate,
+offers: []
+};
+
+merchants.push(newTrader);
+saveMerchants();
+renderAdminTraders();
+renderAdminDashboard();
+
+resultEl.style.color = 'green';
+resultEl.innerText = `✅ تم إضافة ${name} بنجاح`;
+
+document.getElementById('newTraderName').value = '';
+document.getElementById('newTraderBankCode').value = '';
+document.getElementById('newTraderPhone').value = '';
+document.getElementById('newTraderLat').value = '';
+document.getElementById('newTraderLng').value = '';
+
+setTimeout(() => {
+hideAddTraderForm();
+resultEl.innerText = '';
+}, 2000);
+}
+
+// ✅ إدارة العملاء (مع كل المميزات الجديدة)
 function renderAdminCustomers() {
 const c = document.getElementById('adminCustomersList');
 const customers = {};
@@ -1420,18 +2068,182 @@ const list = Object.values(customers);
 if (!list.length) { c.innerHTML = '<p style="color:#6b7280">لا يوجد عملاء</p>'; return; }
 c.innerHTML = list.map(cust => {
 const isBlocked = adminData.blockedCustomers.includes(cust.phone);
+const info = customerData[cust.phone] || {};
 return `<div class="admin-item">
 <div class="head">
-<span class="title">📱 ${cust.phone}</span>
+<span class="title">📱 ${cust.phone}${info.name ? ' - ' + info.name : ''}</span>
 ${isBlocked ? '<span class="blocked-badge">🚫 محظور</span>' : '<span class="active-badge">✅ نشط</span>'}
 </div>
-<div class="info">🏪 ${cust.shops} تاجر | 💰 كسب: ${cust.totalEarned.toFixed(2)} ج | 💵 صرف: ${cust.totalSpent.toFixed(2)} ج</div>
+<div class="info">🏪 ${cust.shops} تاجر | 💰 كسب: ${cust.totalEarned.toFixed(2)} | 💵 صرف: ${cust.totalSpent.toFixed(2)}</div>
 <div class="info">📊 الرصيد الحالي: <strong>${cust.balance.toFixed(2)} ج</strong></div>
 <div class="actions">
-<button class="admin-btn ${isBlocked?'success':'danger'}" onclick="toggleBlockCustomer('${cust.phone}')">${isBlocked?'✅ إلغاء الحظر':'🚫 حظر'}</button>
+<button class="admin-btn primary" onclick="adminEditCustomerBalance('${cust.phone}')">💰 تعديل الرصيد</button>
+<button class="admin-btn warning" onclick="adminEditCustomerData('${cust.phone}')">✏️ تعديل البيانات</button>
+<button class="admin-btn purple" onclick="adminViewCustomerDetails('${cust.phone}')">👁️ التفاصيل</button>
+<button class="admin-btn ${isBlocked?'success':'warning'}" onclick="toggleBlockCustomer('${cust.phone}')">${isBlocked?'✅ إلغاء الحظر':'🚫 حظر'}</button>
+<button class="admin-btn danger" onclick="adminDeleteCustomer('${cust.phone}')">🗑️ حذف</button>
 </div>
 </div>`;
 }).join('');
+}
+
+// ✅ تعديل رصيد عميل
+function adminEditCustomerBalance(phone){
+const wallets = customerWallets[phone] || {};
+const keys = Object.keys(wallets);
+
+if(!keys.length){
+alert('❌ العميل ده مفيهوش محافظ. لازم يكون عنده فاتورة أول.');
+return;
+}
+
+let totalBalance = 0;
+keys.forEach(k => totalBalance += (wallets[k].balance || 0));
+
+const choice = prompt(`💰 رصيد العميل الحالي: ${totalBalance.toFixed(2)} ج\n\nاكتب رقم الاختيار:\n1 - إضافة رصيد\n2 - خصم رصيد\n3 - تصفير كل الرصيد`);
+
+if(choice === null) return;
+
+if(choice === '1'){
+const amount = parseFloat(prompt('اكتب المبلغ اللي عايز تضيفه:'));
+if(isNaN(amount) || amount <= 0){ alert('❌ مبلغ غير صحيح'); return; }
+const bankCode = prompt(`اكتب بنكود التاجر اللي الرصيد هيضاف عنده:\n${keys.join('\n')}`);
+if(!bankCode || !customerWallets[phone][bankCode]){ alert('❌ بنكود غير صحيح'); return; }
+customerWallets[phone][bankCode].balance += amount;
+customerWallets[phone][bankCode].earned += amount;
+saveWallets();
+alert(`✅ تم إضافة ${amount.toFixed(2)} ج لرصيد العميل`);
+} else if(choice === '2'){
+const amount = parseFloat(prompt('اكتب المبلغ اللي عايز تخصمه:'));
+if(isNaN(amount) || amount <= 0){ alert('❌ مبلغ غير صحيح'); return; }
+const bankCode = prompt(`اكتب بنكود التاجر:\n${keys.join('\n')}`);
+if(!bankCode || !customerWallets[phone][bankCode]){ alert('❌ بنكود غير صحيح'); return; }
+customerWallets[phone][bankCode].balance -= amount;
+saveWallets();
+alert(`✅ تم خصم ${amount.toFixed(2)} ج من رصيد العميل`);
+} else if(choice === '3'){
+if(!confirm('متأكد إنك عايز تصفر كل الرصيد؟')) return;
+keys.forEach(k => {
+customerWallets[phone][k].balance = 0;
+});
+saveWallets();
+alert('✅ تم تصفير الرصيد');
+}
+
+renderAdminCustomers();
+renderAdminDashboard();
+}
+
+// ✅ تعديل بيانات عميل
+function adminEditCustomerData(phone){
+const info = customerData[phone] || { name: '', phone: phone };
+const newName = prompt(`الاسم الحالي: ${info.name || 'مش محدد'}\nاكتب الاسم الجديد (أو سيبه فاضي عشان مايتغيرش):`, info.name || '');
+if(newName === null) return;
+const newPhone = prompt(`الموبايل الحالي: ${phone}\nاكتب الموبايل الجديد (أو سيبه زي ما هو):`, phone);
+if(newPhone === null) return;
+
+if(newName.trim()) info.name = newName.trim();
+
+if(newPhone.trim() && newPhone.trim() !== phone){
+// نقل البيانات من الرقم القديم للجديد
+if(customerWallets[phone]){
+customerWallets[newPhone.trim()] = customerWallets[phone];
+delete customerWallets[phone];
+}
+if(customerData[phone]){
+delete customerData[phone];
+}
+customerData[newPhone.trim()] = { ...info, phone: newPhone.trim() };
+saveWallets();
+saveCustomerData();
+alert(`✅ تم تغيير الموبايل من ${phone} لـ ${newPhone.trim()}`);
+} else {
+customerData[phone] = info;
+saveCustomerData();
+alert('✅ تم حفظ البيانات');
+}
+
+renderAdminCustomers();
+}
+
+// ✅ عرض تفاصيل عميل كاملة
+function adminViewCustomerDetails(phone){
+const wallets = customerWallets[phone] || {};
+const myInvoices = invoiceHistory.filter(inv => inv.customerPhone === phone);
+const myRedemptions = redemptionHistory.filter(r => r.phone === phone);
+const info = customerData[phone] || {};
+
+let totalBalance = 0;
+let totalEarned = 0;
+let totalSpent = 0;
+Object.keys(wallets).forEach(k => {
+totalBalance += wallets[k].balance || 0;
+totalEarned += wallets[k].earned || 0;
+totalSpent += wallets[k].spent || 0;
+});
+
+const walletBreakdown = Object.keys(wallets).map(k => {
+const m = merchants.find(x => x.bankCode === k);
+const w = wallets[k];
+return `  🏪 ${m ? m.name : k}: رصيد ${w.balance.toFixed(2)} ج (كسب: ${w.earned.toFixed(2)} / صرف: ${w.spent.toFixed(2)})`;
+}).join('\n');
+
+const lastInvoices = myInvoices.slice(-5).map(inv => 
+`  📄 #${inv.number} - ${inv.merchant} - ${inv.amount} ج (كاش ${inv.cashback} ج)`
+).join('\n') || '  لا توجد فواتير';
+
+const details = `
+👤 بيانات العميل
+━━━━━━━━━━━━━━━━━━
+📱 الموبايل: ${phone}
+📝 الاسم: ${info.name || 'مش محدد'}
+🆔 عدد الفواتير: ${myInvoices.length}
+💵 عدد الاستخدامات: ${myRedemptions.length}
+
+💰 الأرصدة الإجمالية
+━━━━━━━━━━━━━━━━━━
+📊 الرصيد الحالي: ${totalBalance.toFixed(2)} ج
+💰 إجمالي كسب: ${totalEarned.toFixed(2)} ج
+💵 إجمالي صرف: ${totalSpent.toFixed(2)} ج
+
+🏪 تفصيل المحافظ
+━━━━━━━━━━━━━━━━━━
+${walletBreakdown || '  مفيش محافظ'}
+
+📄 آخر 5 فواتير
+━━━━━━━━━━━━━━━━━━
+${lastInvoices}
+`;
+
+alert(details);
+}
+
+// ✅ حذف عميل
+function adminDeleteCustomer(phone){
+if(!confirm(`⚠️ متأكد إنك عايز تحذف حساب العميل ${phone}؟\n\nكل الفواتير والمحافظ بتاعته هتتمسح!`)) return;
+
+// حذف المحافظ
+if(customerWallets[phone]) delete customerWallets[phone];
+if(customerData[phone]) delete customerData[phone];
+
+// حذف فواتيره من السجل
+invoiceHistory = invoiceHistory.filter(inv => inv.customerPhone !== phone);
+// حذف عمليات الصرف بتاعته
+redemptionHistory = redemptionHistory.filter(r => r.phone !== phone);
+
+saveWallets();
+saveCustomerData();
+saveInvoices();
+saveRedemptions();
+
+// إزالة الحظر لو موجود
+const blockIdx = adminData.blockedCustomers.indexOf(phone);
+if(blockIdx > -1) adminData.blockedCustomers.splice(blockIdx, 1);
+saveAdminData();
+
+renderAdminCustomers();
+renderAdminDashboard();
+alert('✅ تم حذف حساب العميل وكل بياناته');
 }
 
 function toggleBlockCustomer(phone) {
@@ -1440,9 +2252,10 @@ if (idx === -1) adminData.blockedCustomers.push(phone);
 else adminData.blockedCustomers.splice(idx, 1);
 saveAdminData();
 renderAdminCustomers();
-alert(idx === -1 ? '✅ تم حظر العميل' : '✅ تم إلغاء الحظر');
+alert(idx === -1 ? '✅ محظور' : '✅ إلغاء الحظر');
 }
 
+// ✅ إدارة الفواتير (مع كل المميزات الجديدة)
 function renderAdminInvoices() {
 const c = document.getElementById('adminInvoicesList');
 const q = (document.getElementById('adminInvoiceSearch')?.value || '').toLowerCase().trim();
@@ -1455,30 +2268,129 @@ list = list.filter(inv =>
 );
 }
 if (!list.length) { c.innerHTML = '<p style="color:#6b7280">لا توجد فواتير</p>'; return; }
-c.innerHTML = list.slice().reverse().map(inv => `
+c.innerHTML = list.slice().reverse().map(inv => {
+const statusBadge = inv.status === 'active' 
+? '<span class="active-badge">✅ نشطة</span>' 
+: `<span class="blocked-badge">❌ ${inv.status === 'returned' ? 'مرتجع كامل' : 'مرتجع جزئي'} (${inv.returnAmount || 0} ج)</span>`;
+return `
 <div class="admin-item">
 <div class="head">
-<span class="title">📄 فاتورة #${inv.number}</span>
-<span style="font-size:13px;color:#ff6b35;font-weight:700">${inv.amount} ج</span>
+<span class="title">📄 #${inv.number}</span>
+<span style="color:#ff6b35;font-weight:700">${inv.amount} ج</span>
 </div>
 <div class="info">🏪 ${inv.merchant} | 📱 ${inv.customerPhone || '-'} | 💵 كاش باك: ${inv.cashback} ج (${inv.cashbackRate||15}%)</div>
+<div class="info">${statusBadge}</div>
 <div class="info" style="font-size:12px">🕒 ${new Date(inv.date).toLocaleString('ar-EG')}</div>
 <div class="actions">
+${inv.status === 'active' ? `
+<button class="admin-btn primary" onclick="adminEditInvoice('${inv.number}')">✏️ تعديل</button>
+<button class="admin-btn danger" onclick="adminProcessReturn('${inv.number}')">🔄 مرتجع</button>
+` : `<span style="color:#6b7280;font-size:12px">(مرتجعة)</span>`}
 <button class="admin-btn danger" onclick="deleteInvoice('${inv.number}')">🗑️ حذف</button>
 </div>
 </div>
-`).join('');
+`;
+}).join('');
+}
+
+// ✅ تعديل فاتورة كأدمن
+function adminEditInvoice(invoiceNumber){
+const inv = invoiceHistory.find(i => i.number === invoiceNumber);
+if(!inv || inv.status !== 'active'){ alert('❌ الفاتورة غير موجودة أو مرتجعة'); return; }
+
+const choice = prompt(`الفاتورة #${inv.number}\nالمبلغ الحالي: ${inv.amount} ج\nموبايل العميل: ${inv.customerPhone || '-'}\n\nاكتب رقم الاختيار:\n1 - تعديل المبلغ\n2 - تعديل موبايل العميل`);
+
+if(choice === null) return;
+
+if(choice === '1'){
+const newAmountStr = prompt(`المبلغ الحالي: ${inv.amount} ج\nالمبلغ الجديد:`, inv.amount);
+if(newAmountStr === null) return;
+const newAmount = parseFloat(newAmountStr);
+if(isNaN(newAmount) || newAmount <= 0){ alert('❌ مبلغ غير صحيح'); return; }
+if(newAmount > parseFloat(inv.amount)){ alert('❌ لا يمكن الزيادة'); return; }
+
+const oldCashback = parseFloat(inv.cashback);
+const newCashback = newAmount * (inv.cashbackRate / 100);
+const cashbackDiff = oldCashback - newCashback;
+
+const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
+if(wallet && cashbackDiff > 0){
+wallet.balance -= cashbackDiff;
+wallet.earned -= cashbackDiff;
+saveWallets();
+}
+
+inv.amount = newAmount;
+inv.cashback = newCashback.toFixed(2);
+inv.editedAt = new Date().toISOString();
+saveInvoices();
+renderAdminInvoices();
+renderAdminDashboard();
+alert(`✅ تم تعديل الفاتورة إلى ${newAmount} ج`);
+} else if(choice === '2'){
+const newPhone = prompt(`موبايل العميل الحالي: ${inv.customerPhone}\nالموبايل الجديد:`, inv.customerPhone);
+if(newPhone === null || !newPhone.trim()) return;
+
+const oldPhone = inv.customerPhone;
+const cleanNewPhone = newPhone.trim();
+
+// نقل محفظة العميل من الرقم القديم للجديد
+if(customerWallets[oldPhone] && customerWallets[oldPhone][inv.bankCode]){
+if(!customerWallets[cleanNewPhone]) customerWallets[cleanNewPhone] = {};
+customerWallets[cleanNewPhone][inv.bankCode] = customerWallets[oldPhone][inv.bankCode];
+delete customerWallets[oldPhone][inv.bankCode];
+if(Object.keys(customerWallets[oldPhone]).length === 0) delete customerWallets[oldPhone];
+saveWallets();
+}
+
+inv.customerPhone = cleanNewPhone;
+saveInvoices();
+renderAdminInvoices();
+alert(`✅ تم تغيير موبايل العميل إلى ${cleanNewPhone}`);
+}
+}
+
+// ✅ عمل مرتجع كأدمن
+function adminProcessReturn(invoiceNumber){
+const inv = invoiceHistory.find(i => i.number === invoiceNumber);
+if(!inv || inv.status !== 'active'){ alert('❌ الفاتورة غير موجودة أو مرتجعة'); return; }
+
+const amount = prompt(`الفاتورة #${inv.number}\nالمبلغ: ${inv.amount} ج\n\nاكتب المبلغ المرتجع (أو 'الكل'):`);
+if(amount === null) return;
+
+let returnAmount = amount === 'الكل' || amount === 'كله' ? parseFloat(inv.amount) : parseFloat(amount);
+if(isNaN(returnAmount) || returnAmount <= 0){ alert('❌ مبلغ غير صحيح'); return; }
+if(returnAmount > parseFloat(inv.amount)){ alert('❌ أكبر من الفاتورة'); return; }
+
+const cashbackToReverse = returnAmount * (inv.cashbackRate / 100);
+const wallet = customerWallets[inv.customerPhone]?.[inv.bankCode];
+if(wallet){
+wallet.balance -= cashbackToReverse;
+wallet.earned -= cashbackToReverse;
+saveWallets();
+}
+
+inv.status = returnAmount >= parseFloat(inv.amount) ? 'returned' : 'partial_return';
+inv.returnAmount = returnAmount;
+inv.returnedCashback = cashbackToReverse;
+inv.returnDate = new Date().toISOString();
+inv.returnedBy = 'admin';
+
+saveInvoices();
+renderAdminInvoices();
+renderAdminDashboard();
+alert(`✅ تم المرتجع. تم خصم ${cashbackToReverse.toFixed(2)} ج من محفظة العميل`);
 }
 
 function deleteInvoice(number) {
-if (!confirm('هل أنت متأكد من حذف هذه الفاتورة؟')) return;
+if (!confirm('حذف الفاتورة؟')) return;
 const idx = invoiceHistory.findIndex(inv => inv.number === number);
 if (idx === -1) return;
 invoiceHistory.splice(idx, 1);
 saveInvoices();
 renderAdminInvoices();
 renderAdminDashboard();
-alert('✅ تم حذف الفاتورة');
+alert('✅ تم الحذف');
 }
 
 function renderAdminNotifHistory() {
@@ -1488,7 +2400,6 @@ c.innerHTML = adminData.notifications.slice().reverse().map(n => `
 <div class="admin-item">
 <div class="head">
 <span class="title">📢 ${n.title}</span>
-<span style="font-size:12px;color:#6b7280">${n.target === 'all' ? 'الكل' : n.target === 'customers' ? 'العملاء' : 'التجار'}</span>
 </div>
 <div class="info">${n.message}</div>
 <div class="info" style="font-size:12px">🕒 ${n.date}</div>
@@ -1499,20 +2410,16 @@ c.innerHTML = adminData.notifications.slice().reverse().map(n => `
 function sendAdminNotification() {
 const title = document.getElementById('notifTitle').value.trim();
 const message = document.getElementById('notifMessage').value.trim();
-const target = document.getElementById('notifTarget').value;
 const resultEl = document.getElementById('notifResult');
 if (!title || !message) {
 resultEl.style.color = '#ef4444';
-resultEl.innerText = '❌ املأ العنوان والرسالة';
+resultEl.innerText = '❌ املأ البيانات';
 return;
 }
-adminData.notifications.push({
-title, message, target,
-date: new Date().toLocaleString('ar-EG')
-});
+adminData.notifications.push({ title, message, target: 'all', date: new Date().toLocaleString('ar-EG') });
 saveAdminData();
 resultEl.style.color = '#27ae60';
-resultEl.innerText = '✅ تم إرسال الإشعار بنجاح';
+resultEl.innerText = '✅ تم الإرسال';
 document.getElementById('notifTitle').value = '';
 document.getElementById('notifMessage').value = '';
 renderAdminNotifHistory();
@@ -1543,6 +2450,8 @@ document.getElementById('tabLogin').style.display='block';
 document.getElementById('tabAccount').style.display='none';
 document.getElementById('tabLogin').classList.add('active');
 document.getElementById('greetingTitle').innerHTML='PAMIGO';
+document.getElementById('myBalanceBanner').style.display='none';
+document.getElementById('myWalletsCard').style.display='none';
 return;
 }
 document.getElementById('tabLogin').style.display='none';
@@ -1555,6 +2464,8 @@ document.getElementById('accName').innerText='المدير';
 document.getElementById('accPhone').innerText='-';
 document.getElementById('pickerTitle').innerText = '📍 حدد موقعك';
 document.getElementById('pickerHint').innerText = 'اضغط على الخريطة أو حرك الدبوس';
+document.getElementById('myBalanceBanner').style.display='none';
+document.getElementById('myWalletsCard').style.display='none';
 renderAdminDashboard();
 } else if(role==='customer'){
 cTabs.forEach(id => document.getElementById(id).style.display='block');
@@ -1565,15 +2476,19 @@ document.getElementById('accPhone').innerText='+20 100 123 4567';
 document.getElementById('pickerTitle').innerText = '📍 حدد موقعك بالضبط على الخريطة';
 document.getElementById('pickerHint').innerText = 'اضغط على الخريطة أو حرك الدبوس، أو ابحث بالعنوان';
 updateAccount();
+updateCustomerBalanceBanner();
+renderCustomerWalletsBreakdown();
 } else {
 mTabs.forEach(id => document.getElementById(id).style.display='block');
 document.getElementById('tabDashboard').classList.add('active');
 document.getElementById('greetingTitle').innerHTML='PAMIGO (تاجر)';
 document.getElementById('accName').innerText = loggedInMerchant?loggedInMerchant.name:'تاجر';
 document.getElementById('accPhone').innerText = loggedInMerchant?loggedInMerchant.phone:'-';
-document.getElementById('pickerTitle').innerText = '📍 حدد موقع متجرك (اللي هيظهر للعملاء)';
+document.getElementById('pickerTitle').innerText = '📍 حدد موقع متجرك';
 document.getElementById('pickerHint').innerText = 'اضغط على الخريطة أو حرك الدبوس، أو ابحث بالعنوان.';
 document.getElementById('accLocation').innerText = loggedInMerchant ? `${loggedInMerchant.lat.toFixed(4)}, ${loggedInMerchant.lng.toFixed(4)}` : 'غير محدد';
+document.getElementById('myBalanceBanner').style.display='none';
+document.getElementById('myWalletsCard').style.display='none';
 renderMerchantData(); renderAnalytics();
 }
 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1584,13 +2499,16 @@ if(act){ const id = act.id.replace('tab-',''); const btn = document.querySelecto
 function handleLogin(){
 const phone = document.getElementById('loginPhone').value.trim();
 const pass = document.getElementById('loginPassword').value.trim();
-const bank = getRealValue('loginBankCode');
 const res = document.getElementById('loginResult');
 
 if(!phone||!pass){ res.style.color='red'; res.innerText='❌ املأ البيانات'; return; }
 
 if(currentRole==='merchant'){
+const bankInput = document.getElementById('loginBankCode');
+const bank = bankInput ? bankInput.value.trim() : '';
+
 if(!bank){ res.style.color='red'; res.innerText='❌ أدخل البنكود'; return; }
+
 if(bank === ADMIN_BANK_CODE){
 loggedInMerchant = null;
 res.style.color = 'green';
@@ -1599,11 +2517,12 @@ switchUI('admin');
 renderAll();
 return;
 }
+
 const merchant = merchants.find(m => m.bankCode === bank);
 if(merchant){
 if(adminData.frozenTraders.includes(bank)){
 res.style.color='red';
-res.innerText='❌ حسابك موقوف مؤقتاً. تواصل مع الإدارة';
+res.innerText='❌ حسابك موقوف مؤقتاً';
 return;
 }
 loggedInMerchant = merchant;
@@ -1617,9 +2536,13 @@ res.innerText='❌ بنكود غير صحيح';
 } else {
 if(adminData.blockedCustomers.includes(phone)){
 res.style.color='red';
-res.innerText='❌ حسابك محظور. تواصل مع الإدارة';
+res.innerText='❌ حسابك محظور';
 return;
 }
+// ✅ حفظ بيانات العميل عند التسجيل
+if(!customerData[phone]) customerData[phone] = { name: '', phone: phone };
+saveCustomerData();
+
 res.style.color='green'; res.innerText='✅ مرحباً عميل';
 loggedInMerchant = null;
 switchUI('customer');
@@ -1630,13 +2553,14 @@ renderAll();
 function handleLogout(){
 loggedInMerchant = null;
 cashbackTotal = 0;
-// ✅ لا نمسح invoiceHistory عشان الفواتير تفضل موجودة
 document.getElementById('accName').innerText='-';
 document.getElementById('accPhone').innerText='-';
 document.getElementById('cashbackBalance').innerText='-';
 document.getElementById('invoiceCount').innerText='-';
 document.getElementById('loginResult').innerText='';
 if(pickerMap){ pickerMap.remove(); pickerMap=null; pickerMarker=null; }
+document.getElementById('myBalanceBanner').style.display='none';
+document.getElementById('myWalletsCard').style.display='none';
 renderInvoiceHistory(); renderMerchantBalances(); updateAccount();
 switchUI('guest');
 alert('✅ تم تسجيل الخروج');
@@ -1657,7 +2581,11 @@ const t = document.getElementById('tab-'+id);
 if(t && t.style.display !== 'none') t.classList.add('active');
 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 this.classList.add('active');
-if(id==='account') setTimeout(initPickerMap, 400);
+if(id==='account'){ 
+setTimeout(initPickerMap, 400); 
+setTimeout(renderCustomerWalletsBreakdown, 200);
+}
+if(id==='home' && currentRole==='customer') updateCustomerBalanceBanner();
 if(id==='analytics' && currentRole==='merchant') renderAnalytics();
 if(id==='reports' && currentRole==='merchant') showReport(currentReportPeriod);
 if(id==='dashboard' && currentRole==='merchant') renderMerchantData();
@@ -1670,6 +2598,47 @@ btn.addEventListener('click', function(){
 document.querySelectorAll('#offersCategories .category-chip').forEach(b => b.classList.remove('active'));
 this.classList.add('active');
 renderOffers(this.dataset.cat);
+});
+});
+
+document.querySelectorAll('#sortOptions .category-chip').forEach(btn => {
+btn.addEventListener('click', function(){
+document.querySelectorAll('#sortOptions .category-chip').forEach(b => b.classList.remove('active'));
+this.classList.add('active');
+currentSortBy = this.dataset.sort;
+filterDealsByRadius(parseFloat(document.getElementById('radiusSlider').value));
+});
+});
+
+document.querySelectorAll('#homeCategories .category-chip').forEach(btn => {
+btn.addEventListener('click', function(){
+const cat = this.dataset.homeCat;
+
+if(cat === 'all'){
+currentHomeCategory = ['all'];
+currentSubCategory = [];
+document.querySelectorAll('#homeCategories .category-chip').forEach(b => b.classList.remove('active'));
+this.classList.add('active');
+} else {
+currentHomeCategory = currentHomeCategory.filter(c => c !== 'all');
+document.querySelector('#homeCategories .category-chip[data-home-cat="all"]').classList.remove('active');
+
+if(currentHomeCategory.includes(cat)){
+currentHomeCategory = currentHomeCategory.filter(c => c !== cat);
+this.classList.remove('active');
+} else {
+currentHomeCategory.push(cat);
+this.classList.add('active');
+}
+
+if(currentHomeCategory.length === 0){
+currentHomeCategory = ['all'];
+document.querySelector('#homeCategories .category-chip[data-home-cat="all"]').classList.add('active');
+}
+}
+
+renderSubCategories();
+filterDealsByRadius(parseFloat(document.getElementById('radiusSlider').value));
 });
 });
 
@@ -1704,6 +2673,7 @@ renderInvoiceHistory(); renderMerchantBalances(); updateAccount();
 const r = parseFloat(document.getElementById('radiusSlider').value);
 document.getElementById('radiusValue').innerText = r;
 if(!loggedInMerchant) filterDealsByRadius(r);
+if(currentRole==='customer'){ updateCustomerBalanceBanner(); renderCustomerWalletsBreakdown(); }
 }
 
 if ('serviceWorker' in navigator) {
@@ -1713,14 +2683,12 @@ navigator.serviceWorker.register('sw.js').then(r => console.log('✅ SW register
 }
 
 window.addEventListener('load', function(){
-setTimeout(()=>document.getElementById('splash-screen').classList.add('hidden'), 1500);
 getLocation();
 renderAll();
 setRole('customer');
 switchUI('guest');
 applyPeekEffect('bankCode');
 applyPeekEffect('redeemBankCode');
-applyPeekEffect('loginBankCode');
 applyPeekEffect('loginPassword');
 });
 </script>
